@@ -309,7 +309,9 @@ Current version: **0.1.0** (initial release)
 
 ## License
 
-MIT © Small Seed Labs
+Apache-2.0 © Small Seed Labs
+
+See [LICENSE](./LICENSE) for full license text.
 
 ---
 
