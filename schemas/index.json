@@ -1,0 +1,319 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/smallseedlabs/proba-protocol/schemas",
+  "title": "Proba Protocol Schemas",
+  "version": "0.1.0",
+  "definitions": {
+    "CommandType": {
+      "$ref": "#/definitions/CommandType",
+      "definitions": {
+        "CommandType": {
+          "type": "string",
+          "enum": [
+            "send_message",
+            "answer_ask",
+            "create_goal",
+            "approve_plan",
+            "control",
+            "explain",
+            "mark_read"
+          ]
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "CommandEnvelope": {
+      "$ref": "#/definitions/CommandEnvelope",
+      "definitions": {
+        "CommandEnvelope": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "command"
+            },
+            "clientMsgId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "send_message",
+                "answer_ask",
+                "create_goal",
+                "approve_plan",
+                "control",
+                "explain",
+                "mark_read"
+              ]
+            },
+            "threadId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "payload": {},
+            "sentAt": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "kind",
+            "clientMsgId",
+            "type",
+            "sentAt"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "EventType": {
+      "$ref": "#/definitions/EventType",
+      "definitions": {
+        "EventType": {
+          "type": "string",
+          "enum": [
+            "message",
+            "ask",
+            "ask_resolved",
+            "status",
+            "alert",
+            "goal_updated",
+            "ack",
+            "error"
+          ]
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "EventEnvelope": {
+      "$ref": "#/definitions/EventEnvelope",
+      "definitions": {
+        "EventEnvelope": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "event"
+            },
+            "seq": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "message",
+                "ask",
+                "ask_resolved",
+                "status",
+                "alert",
+                "goal_updated",
+                "ack",
+                "error"
+              ]
+            },
+            "threadId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "payload": {},
+            "ui": {
+              "type": "object",
+              "properties": {
+                "component": {
+                  "type": "string",
+                  "enum": [
+                    "text",
+                    "plan_card",
+                    "approval_card",
+                    "question_choice",
+                    "question_text",
+                    "metric_tile",
+                    "metric_chart",
+                    "table",
+                    "spend_bar",
+                    "status_banner",
+                    "alert",
+                    "timeline_item",
+                    "goal_summary",
+                    "form",
+                    "number_input",
+                    "select",
+                    "confirm"
+                  ]
+                },
+                "version": {
+                  "type": "string",
+                  "pattern": "^\\d+\\.\\d+\\.\\d+$"
+                },
+                "props": {},
+                "actions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "label": {
+                        "type": "string"
+                      },
+                      "style": {
+                        "type": "string",
+                        "enum": [
+                          "primary",
+                          "default",
+                          "danger"
+                        ]
+                      },
+                      "command": {
+                        "type": "object",
+                        "additionalProperties": {}
+                      },
+                      "opens": {
+                        "$ref": "#/definitions/EventEnvelope/properties/ui"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "label"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "component",
+                "version"
+              ],
+              "additionalProperties": false
+            },
+            "fallbackText": {
+              "type": "string"
+            },
+            "at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "kind",
+            "seq",
+            "type",
+            "at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "ComponentType": {
+      "$ref": "#/definitions/ComponentType",
+      "definitions": {
+        "ComponentType": {
+          "type": "string",
+          "enum": [
+            "text",
+            "plan_card",
+            "approval_card",
+            "question_choice",
+            "question_text",
+            "metric_tile",
+            "metric_chart",
+            "table",
+            "spend_bar",
+            "status_banner",
+            "alert",
+            "timeline_item",
+            "goal_summary",
+            "form",
+            "number_input",
+            "select",
+            "confirm"
+          ]
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "ServerUI": {
+      "$ref": "#/definitions/ServerUI",
+      "definitions": {
+        "ServerUI": {
+          "type": "object",
+          "properties": {
+            "component": {
+              "type": "string",
+              "enum": [
+                "text",
+                "plan_card",
+                "approval_card",
+                "question_choice",
+                "question_text",
+                "metric_tile",
+                "metric_chart",
+                "table",
+                "spend_bar",
+                "status_banner",
+                "alert",
+                "timeline_item",
+                "goal_summary",
+                "form",
+                "number_input",
+                "select",
+                "confirm"
+              ]
+            },
+            "version": {
+              "type": "string",
+              "pattern": "^\\d+\\.\\d+\\.\\d+$"
+            },
+            "props": {},
+            "actions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "style": {
+                    "type": "string",
+                    "enum": [
+                      "primary",
+                      "default",
+                      "danger"
+                    ]
+                  },
+                  "command": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  },
+                  "opens": {
+                    "$ref": "#/definitions/ServerUI"
+                  }
+                },
+                "required": [
+                  "id",
+                  "label"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "component",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  }
+}
