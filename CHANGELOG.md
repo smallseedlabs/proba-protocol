@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2024-10-19
+
+### Fixed
+
+- Add `prepare` script to build dist/ automatically on git URL installs
+- Fixes TypeScript type resolution when installing via `github:smallseedlabs/proba-protocol#v0.1.2`
+
+## [0.1.1] - 2024-10-19
+
 ### Changed
 
 - License changed from MIT to Apache License 2.0
