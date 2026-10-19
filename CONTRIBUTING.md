@@ -2,6 +2,10 @@
 
 Thank you for your interest in contributing to the Proba Protocol library!
 
+## License
+
+By contributing to this project, you agree that your contributions will be licensed under the Apache License 2.0.
+
 ## Development Setup
 
 1. **Clone the repository**
