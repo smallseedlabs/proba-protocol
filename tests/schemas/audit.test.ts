@@ -10,7 +10,7 @@ import {
   validateStoredAuditEvent,
 } from '../../src/schemas/audit.js';
 import { buildAuditEvent, generateSpanId } from '../../src/builders/audit.js';
-import { isAuditEvent, canonicalizeAuditEvent, AUDIT_ACTIONS } from '../../src/utils/audit.js';
+import { isAuditEvent, canonicalizeAuditEvent } from '../../src/utils/audit.js';
 import { auditCategorySchema, spanIdSchema } from '../../src/schemas/audit.js';
 
 const TRACE_ID = '550e8400-e29b-41d4-a716-446655440000';
@@ -317,23 +317,6 @@ describe('Audit Schemas', () => {
     it('should change when any value changes', () => {
       const event = buildAuditEvent(minimalDraft);
       expect(canonicalizeAuditEvent(event)).not.toBe(canonicalizeAuditEvent({ ...event, outcome: 'failure' }));
-    });
-  });
-
-  describe('AUDIT_ACTIONS', () => {
-    it('should list actions for every category, each prefixed by its category', () => {
-      for (const category of auditCategorySchema.options) {
-        const actions = AUDIT_ACTIONS[category];
-        expect(actions.length).toBeGreaterThan(0);
-        for (const action of actions) {
-          expect(action.startsWith(`${category}.`)).toBe(true);
-          expect(validateAuditEvent({ ...fullEvent, category, action }).success).toBe(true);
-        }
-      }
-    });
-
-    it('should not enforce the list: other action names remain valid', () => {
-      expect(validateAuditEvent({ ...fullEvent, action: 'command.something_new' }).success).toBe(true);
     });
   });
 });

@@ -1,9 +1,9 @@
 /**
- * Audit trail utilities: type guard, canonical serialisation and recommended
- * action names.
+ * Audit trail utilities: type guard and canonical serialisation. The action
+ * catalog lives in ./audit-actions.ts.
  */
 
-import type { AuditCategory, AuditEvent } from '../types/audit.js';
+import type { AuditEvent } from '../types/audit.js';
 import type { MetricObservation } from '../types/metrics.js';
 import { auditEventSchema } from '../schemas/audit.js';
 import { metricObservationSchema } from '../schemas/metrics.js';
@@ -44,22 +44,3 @@ function sortKeys(value: unknown): unknown {
 export function canonicalizeAuditEvent(event: AuditEvent): string {
   return JSON.stringify(sortKeys(event));
 }
-
-/**
- * Recommended action names per category. Not exhaustive and not enforced:
- * validation only requires the dotted lower-case shape, so services may add
- * their own actions.
- */
-export const AUDIT_ACTIONS = {
-  command: ['command.received', 'command.accepted', 'command.rejected', 'command.processed', 'command.duplicate'],
-  brain: ['brain.llm_call', 'brain.plan_created', 'brain.clarify_requested', 'brain.decision_made', 'brain.error'],
-  tool: ['tool.called', 'tool.completed', 'tool.failed'],
-  policy: ['policy.evaluated', 'policy.allowed', 'policy.denied'],
-  approval: ['approval.requested', 'approval.granted', 'approval.rejected', 'approval.expired'],
-  data_access: ['data_access.read', 'data_access.write', 'data_access.export'],
-  memory: ['memory.read', 'memory.write', 'memory.delete'],
-  metrics: ['metrics.fetch_started', 'metrics.fetch_completed', 'metrics.fetch_failed', 'metrics.observation_stored'],
-  auth: ['auth.sign_in', 'auth.sign_out', 'auth.session_issued', 'auth.session_revoked', 'auth.denied'],
-  config: ['config.changed', 'config.loaded'],
-  system: ['system.started', 'system.stopped', 'system.job_run', 'system.error'],
-} as const satisfies Record<AuditCategory, readonly string[]>;
