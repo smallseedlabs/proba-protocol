@@ -5,7 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.0] - 2026-10-25
+
+### Added
+
+- Complete audit action catalog, additive and backwards compatible (every action published in 0.2.0 is still listed and valid; the `AuditEvent` schema, its action regex and the JSON Schema bundle are unchanged):
+  - New domains and actions: `thread.*` (`created`, `message_received`, `access_denied`), `goal.*` (`created`, `updated`, `status_changed`, `clarification_answered`, `budget_proposed`, `budget_approved`, `budget_declined`), `budget.*` (`evaluated`, `limit_reached`), `control.*` (`paused`, `resumed`, `emergency_stopped`, `killed`), `stream.*` (`connected`, `disconnected`)
+  - New actions in existing domains: `brain.reply_generated`, `brain.explanation_generated`, `brain.clarification_requested`, `tool.proposed`, `tool.executed`, `auth.session_expired`, `data_access.delete`, `memory.ingested`, `memory.promoted`, `memory.consolidated`, `memory.decayed`, `memory.retrieved`, `metrics.ingested`, `metrics.restated`, `metrics.rollup_run`, `system.job_failed`
+  - `AUDIT_ACTION_INFO`: recommended `category`, default `riskLevel`, `status` (`specific` / `generic` / `alias`), `preferred` replacements and a description per action
+  - `isKnownAuditAction` and `getAuditActionInfo` helpers; `AuditActionName`, `AuditActionDomain`, `AuditActionInfo` and `AuditActionStatus` types
+  - README: catalog table and a generic-to-specific mapping
+
+### Changed
+
+- `AUDIT_ACTIONS` is grouped by domain instead of by category. The 11 category names are still keys with all their old entries, so `AUDIT_ACTIONS[category]` keeps working; new keys (`thread`, `goal`, `budget`, `control`, `stream`) are domains whose actions map to an existing category (see `AUDIT_ACTION_INFO`). Code that assumes the keys of `AUDIT_ACTIONS` are exactly the categories (for example `keyof typeof AUDIT_ACTIONS` used as a category type) must switch to `AuditCategory`
+- Generic actions stay valid but are documented as such, with preferred replacements: `data_access.read` / `data_access.write`, `policy.evaluated`, `policy.denied`, `config.changed`, `tool.called`, `memory.read` / `memory.write`. Aliases: `brain.clarify_requested`, `tool.completed`, `metrics.observation_stored`
+- `AuditCategory` is intentionally unchanged: new domains reuse the existing categories, because stores index on the category enum
+
+### Fixed
+
+- `package.json` version (the `v0.2.0` tag still said 0.1.2, and `package-lock.json` said 0.1.0) is now 0.3.0
+
+## [0.2.0] - 2026-10-25
+
+This section was `[Unreleased]` when `v0.2.0` was tagged.
 
 ### Added
 
