@@ -35,6 +35,17 @@ export const AUDIT_ACTIONS = {
     'goal.budget_declined',
   ],
   budget: ['budget.evaluated', 'budget.limit_reached'],
+  campaign: [
+    'campaign.created',
+    'campaign.launched',
+    'campaign.paused',
+    'campaign.resumed',
+    'campaign.stopped',
+    'campaign.budget_changed',
+    'campaign.synced',
+    'campaign.sync_failed',
+    'campaign.metrics_attributed',
+  ],
   brain: [
     'brain.llm_call',
     'brain.reply_generated',
@@ -139,6 +150,17 @@ export const AUDIT_ACTION_INFO: Record<AuditActionName, AuditActionInfo> = {
   // budget
   'budget.evaluated': info('policy', 'medium', 'A cost or spend was checked against a budget (details: limit, spent, enforced; outcome success or denied).'),
   'budget.limit_reached': info('policy', 'high', 'A budget limit was reached or exceeded.'),
+
+  // campaign
+  'campaign.created': info('command', 'low', 'An ad campaign was created (draft, nothing is spending yet). Set campaignId.'),
+  'campaign.launched': info('command', 'high', 'An ad campaign was launched on a platform and can spend money (details: platform, account id, budget; no credentials).'),
+  'campaign.paused': info('command', 'medium', 'A running ad campaign was paused (details.reason).'),
+  'campaign.resumed': info('command', 'medium', 'A paused ad campaign was resumed and can spend again.'),
+  'campaign.stopped': info('command', 'medium', 'An ad campaign was stopped for good (it will not run again).'),
+  'campaign.budget_changed': info('policy', 'high', 'The budget or spend cap of a campaign changed (details: from, to, currency, period).'),
+  'campaign.synced': info('metrics', 'low', 'Campaign state and structure were synced from an ad platform (details: counts, window).'),
+  'campaign.sync_failed': info('metrics', 'medium', 'Syncing a campaign from an ad platform failed (outcome failure; errorCode set).'),
+  'campaign.metrics_attributed': info('metrics', 'low', 'Ad-platform metrics were attributed to a campaign (details: platform, window, observation count).'),
 
   // brain
   'brain.llm_call': info('brain', 'low', 'The brain / an LLM was invoked (model, token cost, output kinds; no prompt or reply text).'),
