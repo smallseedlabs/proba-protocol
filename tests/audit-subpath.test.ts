@@ -18,6 +18,9 @@ describe('audit exports', () => {
       'isAuditEvent',
       'canonicalizeAuditEvent',
       'AUDIT_ACTIONS',
+      'AUDIT_ACTION_INFO',
+      'isKnownAuditAction',
+      'getAuditActionInfo',
     ]) {
       expect((audit as Record<string, unknown>)[name]).toBeDefined();
     }
