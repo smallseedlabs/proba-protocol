@@ -21,6 +21,11 @@ async function generateSchemas() {
     '../dist/schemas/ui.js'
   );
 
+  const { auditEventSchema, storedAuditEventSchema } = await import(
+    '../dist/schemas/audit.js'
+  );
+  const { metricObservationSchema } = await import('../dist/schemas/metrics.js');
+
   const schemas = {
     $schema: 'http://json-schema.org/draft-07/schema#',
     $id: 'https://github.com/smallseedlabs/proba-protocol/schemas',
@@ -33,6 +38,9 @@ async function generateSchemas() {
       EventEnvelope: zodToJsonSchema(eventEnvelopeSchema, 'EventEnvelope'),
       ComponentType: zodToJsonSchema(componentTypeSchema, 'ComponentType'),
       ServerUI: zodToJsonSchema(serverUISchema, 'ServerUI'),
+      AuditEvent: zodToJsonSchema(auditEventSchema, 'AuditEvent'),
+      StoredAuditEvent: zodToJsonSchema(storedAuditEventSchema, 'StoredAuditEvent'),
+      MetricObservation: zodToJsonSchema(metricObservationSchema, 'MetricObservation'),
     },
   };
 

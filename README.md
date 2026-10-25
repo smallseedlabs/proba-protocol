@@ -143,6 +143,100 @@ const schemas = require('@smallseedlabs/proba-protocol/schemas');
 validate(data, schemas.definitions.CommandEnvelope);
 ```
 
+## Audit and Metrics Contract
+
+Every Proba service logs every action to a global audit trail, and ad-platform numbers are normalised into one shape. The contract for both lives here. Like the rest of this package it is I/O-free: schemas, types, builders and validators only. There is no database, bus or network code; services bring their own.
+
+Import from the package root or from the dedicated subpath:
+
+```typescript
+import {
+  buildAuditEvent,
+  validateAuditEvent,
+  isAuditEvent,
+  AUDIT_ACTIONS,
+  validateMetricObservation,
+} from '@smallseedlabs/proba-protocol/audit';
+```
+
+### AuditEvent (version 1)
+
+Producers emit `AuditEvent`s. The audit consumer stores them as `StoredAuditEvent`s.
+
+```typescript
+const event = buildAuditEvent({
+  traceId: command.clientMsgId, // root of the trace: the web command's clientMsgId, or a job run id
+  workspaceId: 'default',
+  userId,
+  threadId,
+  actor: { type: 'user', id: userId },
+  service: 'hub',
+  action: 'command.received', // dotted, lower-case
+  category: 'command',
+  outcome: 'success',
+  details: { commandType: command.type },
+});
+// buildAuditEvent fills version, eventId, spanId, occurredAt and details when omitted.
+
+const result = validateAuditEvent(event); // zod SafeParseReturnType
+if (!result.success) console.error(result.error.issues);
+```
+
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| `version` | `1` | yes | Defaulted by `buildAuditEvent` |
+| `eventId` | uuid | yes | Producer-generated; the consumer dedupes on it |
+| `traceId` | uuid | yes | Groups everything caused by one root |
+| `spanId` | string (1-64) | yes | Defaulted to 16 hex chars by `buildAuditEvent` |
+| `parentSpanId` | string (1-64) | no | Absent on the root span |
+| `workspaceId` | string | yes | |
+| `userId` | uuid | no | |
+| `goalId` / `threadId` | uuid | no | |
+| `campaignId` | string | no | Not a uuid: may be a platform id |
+| `actor` | `{ type: 'user' \| 'brain' \| 'system' \| 'service', id: string }` | yes | |
+| `service` | string | yes | Emitting service, e.g. `hub` |
+| `action` | string | yes | Dotted lower-case, at least two segments, e.g. `brain.llm_call` |
+| `category` | `command` \| `brain` \| `tool` \| `policy` \| `approval` \| `data_access` \| `memory` \| `metrics` \| `auth` \| `config` \| `system` | yes | |
+| `target` | `{ type: string, id: string }` | no | |
+| `outcome` | `success` \| `failure` \| `denied` \| `partial` | yes | |
+| `errorCode` / `errorMessage` | string | no | |
+| `riskLevel` | `low` \| `medium` \| `high` | no | |
+| `cost` | `{ tokensIn?, tokensOut?, currency?, amount? }` | no | `currency` (3 letters) and `amount` go together |
+| `durationMs` | number >= 0 | no | |
+| `occurredAt` | ISO 8601 datetime | yes | When the action happened; defaulted to now |
+| `details` | `Record<string, unknown>` | yes | Defaulted to `{}`. See the rule below |
+| `tags` | string[] | no | |
+
+**Rule for `details`: no secrets and no raw personal data.** Never put API keys, tokens, passwords, cookies, auth headers or platform credentials in an audit event, and refer to people and records by id, not by name, email or free text. This rule is documentation only: validation does not inspect keys or values, so producers are responsible for it.
+
+`AUDIT_ACTIONS` lists recommended action names per category (for example `command.received`, `policy.denied`). It is a suggestion, not an allow-list: any dotted lower-case action validates.
+
+**Stored form.** `StoredAuditEvent` extends `AuditEvent` with `prevHash` (`string | null`, null for the first event), `hash`, `ingestedAt` and `schemaVersion`. Producers never set these; the audit consumer adds them when it appends the event to the hash chain. `canonicalizeAuditEvent(event)` returns the canonical JSON (keys sorted recursively, `undefined` omitted, no whitespace) that the consumer can hash. The hash algorithm and the chaining rule belong to the consumer and are not implemented here.
+
+### MetricObservation (version 1)
+
+One normalised reading of a campaign's ad-platform numbers for a period.
+
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| `version` | `1` | yes | |
+| `platform` | `meta` \| `google` \| `reddit` \| `x` \| `microsoft` \| `other` | yes | |
+| `accountId` / `campaignId` | string | yes | |
+| `adsetId` / `adId` | string | no | |
+| `granularity` | `hour` \| `day` | yes | |
+| `periodStart` / `periodEnd` | ISO 8601 datetime | yes | `periodEnd` must be after `periodStart` |
+| `metrics.impressions` / `metrics.clicks` | integer >= 0 | yes | |
+| `metrics.spend` | number >= 0 | yes | Major units of `currency` |
+| `metrics.conversions` | number >= 0 | yes | May be fractional (modelled conversions) |
+| `metrics.reach` / `metrics.videoViews` | integer >= 0 | no | |
+| `metrics.revenue` | number >= 0 | no | Major units of `currency` |
+| `currency` | string (3 letters) | yes | ISO 4217 |
+| `fetchedAt` | ISO 8601 datetime | yes | |
+| `revision` | integer >= 0 | yes | Increases when a period is re-fetched and restated |
+| `sourceRef` | string | no | Opaque pointer to the raw source; never credentials |
+
+Validate with `validateMetricObservation(value)` (zod result) or `isMetricObservation(value)` (type guard). The JSON Schema bundle also includes `AuditEvent`, `StoredAuditEvent` and `MetricObservation`.
+
 ## Transport Contract
 
 ### REST Endpoint: Commands

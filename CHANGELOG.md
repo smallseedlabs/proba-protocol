@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `AuditEvent` (version 1) and `StoredAuditEvent` schemas and types for the global audit trail
+- `MetricObservation` (version 1) schema and types for normalised ad-platform metrics
+- `buildAuditEvent`, `validateAuditEvent`, `validateStoredAuditEvent`, `isAuditEvent`, `validateMetricObservation` and `isMetricObservation` helpers
+- `canonicalizeAuditEvent` (stable key order) for consumers that hash audit events
+- `AUDIT_ACTIONS` recommended action names per category
+- `@smallseedlabs/proba-protocol/audit` subpath export; everything is also exported from the package root
+- `AuditEvent`, `StoredAuditEvent` and `MetricObservation` in the JSON Schema bundle
+
 ## [0.1.2] - 2024-10-19
 
 ### Fixed
