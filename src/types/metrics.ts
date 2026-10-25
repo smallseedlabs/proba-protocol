@@ -5,6 +5,13 @@
  * for a time period. Fetchers map each ad platform's response into this shape.
  */
 
+/**
+ * Timestamps (`periodStart`, `periodEnd`, `fetchedAt`): ISO 8601 / RFC 3339,
+ * UTC, trailing "Z", millisecond precision as produced by Date.toISOString().
+ * Services store and send UTC only; UIs convert to local time for display.
+ * The ad account's reporting timezone is carried separately in `timezone`.
+ */
+
 export const METRIC_OBSERVATION_VERSION = 1;
 
 export type MetricObservationVersion = typeof METRIC_OBSERVATION_VERSION;
@@ -43,7 +50,17 @@ export interface MetricObservation {
   currency: string;
   /** ISO 8601 UTC timestamp of when the platform was queried. */
   fetchedAt: string;
-  /** Increases each time the same period is re-fetched and the numbers are restated. */
+  /**
+   * IANA time zone name of the ad account's reporting timezone, e.g.
+   * "Europe/London". It defines what a `day` granularity period means for the
+   * account (local midnight to local midnight); periodStart/periodEnd are still
+   * UTC instants.
+   */
+  timezone?: string;
+  /**
+   * 0 is the first fetch of the period; each restatement of the same period
+   * increments it.
+   */
   revision: number;
   /** Opaque pointer to the raw source (e.g. a report or request id). Not a URL with credentials. */
   sourceRef?: string;

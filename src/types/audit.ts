@@ -6,6 +6,10 @@
  * StoredAuditEvents (adding the hash chain). This module is I/O-free: it only
  * describes the shape of the data.
  *
+ * Timestamps (`occurredAt`, `ingestedAt`): ISO 8601 / RFC 3339, UTC, trailing
+ * "Z", millisecond precision as produced by Date.toISOString(). Services store
+ * and send UTC only; UIs convert to local time for display.
+ *
  * Rules for `details` (documentation only, not enforced by validation):
  * - Never put secrets in `details`: no API keys, tokens, passwords, cookies,
  *   authorization headers or ad-platform credentials.
@@ -64,17 +68,30 @@ export interface AuditEvent {
   eventId: string;
   /**
    * UUID that ties together everything caused by one root. The root is the web
-   * command's clientMsgId, or a job run id for background work.
+   * command's clientMsgId, or a job run id for background work. It stays a UUID
+   * and is OpenTelemetry-compatible: remove the dashes to get the 32-hex
+   * OpenTelemetry trace id.
    */
   traceId: string;
-  /** Id of this step within the trace. */
+  /**
+   * Id of this step within the trace: OpenTelemetry style, exactly 16 lowercase
+   * hex characters, not all zeros.
+   */
   spanId: string;
-  /** spanId of the step that caused this one; absent for the root span. */
+  /** spanId of the step that caused this one (same format); absent for the root span. */
   parentSpanId?: string;
+  /**
+   * Workspace the action belongs to. Free string. Suggested default workspace
+   * id (documentation only): "seedbed".
+   */
   workspaceId: string;
   userId?: string;
   goalId?: string;
   threadId?: string;
+  /**
+   * Free string, not a uuid: campaign ids usually come from ad platforms, whose
+   * ids are not uuids.
+   */
   campaignId?: string;
   actor: AuditActor;
   /** Emitting service, e.g. "hub". */
@@ -89,7 +106,7 @@ export interface AuditEvent {
   riskLevel?: AuditRiskLevel;
   cost?: AuditCost;
   durationMs?: number;
-  /** ISO 8601 UTC timestamp of when the action happened (not when it was ingested). */
+  /** UTC timestamp (see the timestamp rule above) of when the action happened, not when it was ingested. */
   occurredAt: string;
   /** Structured context. See the rules at the top of this file. */
   details: Record<string, unknown>;

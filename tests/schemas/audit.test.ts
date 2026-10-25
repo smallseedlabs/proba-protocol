@@ -11,7 +11,7 @@ import {
 } from '../../src/schemas/audit.js';
 import { buildAuditEvent, generateSpanId } from '../../src/builders/audit.js';
 import { isAuditEvent, canonicalizeAuditEvent, AUDIT_ACTIONS } from '../../src/utils/audit.js';
-import { auditCategorySchema } from '../../src/schemas/audit.js';
+import { auditCategorySchema, spanIdSchema } from '../../src/schemas/audit.js';
 
 const TRACE_ID = '550e8400-e29b-41d4-a716-446655440000';
 
@@ -106,6 +106,46 @@ describe('Audit Schemas', () => {
       }
     });
 
+    it('should accept OpenTelemetry-style span ids and parent span ids', () => {
+      for (const id of ['a1b2c3d4e5f60718', '0000000000000001', 'ffffffffffffffff']) {
+        expect(auditEventSchema.safeParse({ ...fullEvent, spanId: id }).success).toBe(true);
+        expect(auditEventSchema.safeParse({ ...fullEvent, parentSpanId: id }).success).toBe(true);
+      }
+    });
+
+    it('should reject span ids that are uppercase, the wrong length, non-hex or all zeros', () => {
+      const bad = [
+        'A1B2C3D4E5F60718', // uppercase
+        'a1b2c3d4e5f6071', // 15 chars
+        'a1b2c3d4e5f607180', // 17 chars
+        'g1b2c3d4e5f60718', // not hex
+        '0000000000000000', // all zeros
+        '',
+        'abc',
+      ];
+      for (const id of bad) {
+        expect(auditEventSchema.safeParse({ ...fullEvent, spanId: id }).success).toBe(false);
+        expect(auditEventSchema.safeParse({ ...fullEvent, parentSpanId: id }).success).toBe(false);
+        expect(spanIdSchema.safeParse(id).success).toBe(false);
+      }
+    });
+
+    it('should keep traceId a UUID that maps to a 32-hex OpenTelemetry trace id', () => {
+      expect(TRACE_ID.replace(/-/g, '')).toMatch(/^[0-9a-f]{32}$/);
+      expect(auditEventSchema.safeParse({ ...fullEvent, traceId: TRACE_ID.replace(/-/g, '') }).success).toBe(false);
+    });
+
+    it('should accept only UTC timestamps with a trailing Z', () => {
+      expect(auditEventSchema.safeParse({ ...fullEvent, occurredAt: new Date().toISOString() }).success).toBe(true);
+      expect(auditEventSchema.safeParse({ ...fullEvent, occurredAt: '2026-10-25T21:00:00.000+01:00' }).success).toBe(false);
+      expect(auditEventSchema.safeParse({ ...fullEvent, occurredAt: '2026-10-25T21:00:00' }).success).toBe(false);
+    });
+
+    it('should accept any non-empty campaignId (not a uuid)', () => {
+      expect(auditEventSchema.safeParse({ ...fullEvent, campaignId: '23851234567890123' }).success).toBe(true);
+      expect(auditEventSchema.safeParse({ ...fullEvent, campaignId: '' }).success).toBe(false);
+    });
+
     it('should reject malformed timestamps', () => {
       expect(auditEventSchema.safeParse({ ...fullEvent, occurredAt: 'yesterday' }).success).toBe(false);
     });
@@ -192,18 +232,18 @@ describe('Audit Schemas', () => {
       const event = buildAuditEvent({
         ...minimalDraft,
         eventId: fullEvent.eventId,
-        spanId: 'abc',
+        spanId: 'abcdef0123456789',
         occurredAt: '2026-01-01T00:00:00.000Z',
         details: { a: 1 },
         tags: ['x'],
-        parentSpanId: 'root',
+        parentSpanId: '0123456789abcdef',
       });
       expect(event.eventId).toBe(fullEvent.eventId);
-      expect(event.spanId).toBe('abc');
+      expect(event.spanId).toBe('abcdef0123456789');
       expect(event.occurredAt).toBe('2026-01-01T00:00:00.000Z');
       expect(event.details).toEqual({ a: 1 });
       expect(event.tags).toEqual(['x']);
-      expect(event.parentSpanId).toBe('root');
+      expect(event.parentSpanId).toBe('0123456789abcdef');
     });
 
     it('should not validate: invalid input passes through for validateAuditEvent to catch', () => {
@@ -212,7 +252,12 @@ describe('Audit Schemas', () => {
     });
 
     it('generateSpanId should return 16 hex characters', () => {
-      expect(generateSpanId()).toMatch(/^[0-9a-f]{16}$/);
+      for (let i = 0; i < 50; i++) {
+        const id = generateSpanId();
+        expect(id).toMatch(/^[0-9a-f]{16}$/);
+        expect(id).not.toBe('0000000000000000');
+        expect(spanIdSchema.safeParse(id).success).toBe(true);
+      }
     });
   });
 
@@ -254,13 +299,13 @@ describe('Audit Schemas', () => {
 
   describe('canonicalizeAuditEvent', () => {
     it('should be independent of key order', () => {
-      const a = buildAuditEvent({ ...minimalDraft, eventId: fullEvent.eventId, spanId: 's', occurredAt: '2026-01-01T00:00:00.000Z', details: { b: 1, a: { d: 1, c: 2 } } });
-      const b = buildAuditEvent({ details: { a: { c: 2, d: 1 }, b: 1 }, occurredAt: '2026-01-01T00:00:00.000Z', spanId: 's', eventId: fullEvent.eventId, outcome: 'success', category: 'command', action: 'command.received', service: 'hub', actor: { id: 'hub', type: 'service' }, workspaceId: 'default', traceId: TRACE_ID });
+      const a = buildAuditEvent({ ...minimalDraft, eventId: fullEvent.eventId, spanId: '1111111111111111', occurredAt: '2026-01-01T00:00:00.000Z', details: { b: 1, a: { d: 1, c: 2 } } });
+      const b = buildAuditEvent({ details: { a: { c: 2, d: 1 }, b: 1 }, occurredAt: '2026-01-01T00:00:00.000Z', spanId: '1111111111111111', eventId: fullEvent.eventId, outcome: 'success', category: 'command', action: 'command.received', service: 'hub', actor: { id: 'hub', type: 'service' }, workspaceId: 'default', traceId: TRACE_ID });
       expect(canonicalizeAuditEvent(a)).toBe(canonicalizeAuditEvent(b));
     });
 
     it('should sort keys, omit undefined and preserve array order', () => {
-      const event = buildAuditEvent({ ...minimalDraft, eventId: fullEvent.eventId, spanId: 's', occurredAt: '2026-01-01T00:00:00.000Z', details: { z: [3, 1, 2], a: undefined }, tags: ['b', 'a'], userId: undefined });
+      const event = buildAuditEvent({ ...minimalDraft, eventId: fullEvent.eventId, spanId: '1111111111111111', occurredAt: '2026-01-01T00:00:00.000Z', details: { z: [3, 1, 2], a: undefined }, tags: ['b', 'a'], userId: undefined });
       const text = canonicalizeAuditEvent(event);
       expect(text).toContain('"details":{"z":[3,1,2]}');
       expect(text).toContain('"tags":["b","a"]');

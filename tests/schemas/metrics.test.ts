@@ -6,6 +6,7 @@ import { describe, it, expect } from '@jest/globals';
 import {
   metricObservationSchema,
   validateMetricObservation,
+  isValidTimeZone,
 } from '../../src/schemas/metrics.js';
 import { isMetricObservation } from '../../src/utils/audit.js';
 
@@ -30,6 +31,7 @@ const valid = {
   },
   currency: 'USD',
   fetchedAt: '2026-10-25T06:00:00.000Z',
+  timezone: 'Europe/London',
   revision: 0,
   sourceRef: 'report-789',
 };
@@ -104,6 +106,34 @@ describe('Metric Schemas', () => {
     it('should require periodEnd after periodStart', () => {
       expect(metricObservationSchema.safeParse({ ...valid, periodEnd: valid.periodStart }).success).toBe(false);
       expect(metricObservationSchema.safeParse({ ...valid, periodEnd: '2026-10-23T00:00:00.000Z' }).success).toBe(false);
+    });
+
+    it('should accept valid IANA time zones and omit-able timezone', () => {
+      for (const timezone of ['Europe/London', 'America/Los_Angeles', 'Asia/Kolkata', 'UTC']) {
+        expect(metricObservationSchema.safeParse({ ...valid, timezone }).success).toBe(true);
+      }
+      const { timezone: _tz, ...withoutTz } = valid;
+      void _tz;
+      expect(metricObservationSchema.safeParse(withoutTz).success).toBe(true);
+    });
+
+    it('should reject empty or unknown time zones', () => {
+      for (const timezone of ['', 'Mars/Olympus_Mons', 'not a zone']) {
+        expect(metricObservationSchema.safeParse({ ...valid, timezone }).success).toBe(false);
+      }
+    });
+
+    it('isValidTimeZone should mirror Intl support', () => {
+      expect(isValidTimeZone('Europe/London')).toBe(true);
+      expect(isValidTimeZone('Nowhere/Land')).toBe(false);
+    });
+
+    it('should accept revision 0 as the first fetch', () => {
+      expect(metricObservationSchema.safeParse({ ...valid, revision: 0 }).success).toBe(true);
+    });
+
+    it('should accept only UTC timestamps with a trailing Z', () => {
+      expect(metricObservationSchema.safeParse({ ...valid, periodStart: '2026-10-24T00:00:00.000+01:00' }).success).toBe(false);
     });
 
     it('should require integer, non-negative revision', () => {

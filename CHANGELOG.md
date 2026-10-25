@@ -16,6 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `AUDIT_ACTIONS` recommended action names per category
 - `@smallseedlabs/proba-protocol/audit` subpath export; everything is also exported from the package root
 - `AuditEvent`, `StoredAuditEvent` and `MetricObservation` in the JSON Schema bundle
+- Optional `MetricObservation.timezone` (IANA zone name, validated with `Intl.DateTimeFormat`): the ad account's reporting timezone, which defines what a `day` period means
+- `spanIdSchema`, `SPAN_ID_PATTERN` and `isValidTimeZone` exports
+
+### Changed (within this unreleased contract)
+
+- `AuditEvent.spanId` and `parentSpanId` are strict OpenTelemetry-style ids: exactly 16 lowercase hex characters, not all zeros. `generateSpanId` never returns all zeros
+- Documented: `traceId` stays a UUID (remove the dashes for the 32-hex OpenTelemetry trace id); `campaignId` is a free string; `revision` starts at 0; timestamps are UTC ISO 8601 with trailing `Z`; suggested default `workspaceId` is `seedbed`
 
 ## [0.1.2] - 2024-10-19
 

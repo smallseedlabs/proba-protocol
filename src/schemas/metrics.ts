@@ -18,6 +18,19 @@ export const metricValuesSchema = z.object({
   revenue: z.number().nonnegative().optional(),
 });
 
+/** True when the runtime's Intl implementation accepts the IANA time zone name. */
+export function isValidTimeZone(zone: string): boolean {
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: zone });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Timestamp rule: ISO 8601 / RFC 3339, UTC, trailing "Z", millisecond precision
+// as produced by Date.toISOString(). Offsets are rejected. Services store and
+// send UTC only; UIs convert to local time for display.
 export const metricObservationSchema = z
   .object({
     version: z.literal(1),
@@ -32,6 +45,12 @@ export const metricObservationSchema = z
     metrics: metricValuesSchema,
     currency: z.string().length(3),
     fetchedAt: z.string().datetime(),
+    timezone: z
+      .string()
+      .min(1)
+      .refine(isValidTimeZone, { message: 'timezone must be an IANA time zone name' })
+      .optional(),
+    // 0 is the first fetch of the period; each restatement increments it.
     revision: z.number().int().nonnegative(),
     sourceRef: z.string().min(1).optional(),
   })

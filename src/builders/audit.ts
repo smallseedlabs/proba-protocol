@@ -14,9 +14,11 @@ import { generateIdempotencyKey } from '../utils/idempotency.js';
 export type AuditEventDraft = Omit<AuditEvent, 'version' | 'eventId' | 'spanId' | 'occurredAt' | 'details'> &
   Partial<Pick<AuditEvent, 'version' | 'eventId' | 'spanId' | 'occurredAt' | 'details'>>;
 
-/** Generates a 16-hex-character span id. */
+/** Generates an OpenTelemetry-style span id: 16 lowercase hex characters, never all zeros. */
 export function generateSpanId(): string {
-  return randomBytes(8).toString('hex');
+  let id = randomBytes(8).toString('hex');
+  while (id === '0000000000000000') id = randomBytes(8).toString('hex');
+  return id;
 }
 
 /**

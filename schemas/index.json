@@ -335,13 +335,10 @@
             },
             "spanId": {
               "type": "string",
-              "minLength": 1,
-              "maxLength": 64
+              "pattern": "^[0-9a-f]{16}$"
             },
             "parentSpanId": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 64
+              "$ref": "#/definitions/AuditEvent/properties/spanId"
             },
             "workspaceId": {
               "type": "string",
@@ -534,13 +531,10 @@
             },
             "spanId": {
               "type": "string",
-              "minLength": 1,
-              "maxLength": 64
+              "pattern": "^[0-9a-f]{16}$"
             },
             "parentSpanId": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 64
+              "$ref": "#/definitions/StoredAuditEvent/properties/spanId"
             },
             "workspaceId": {
               "type": "string",
@@ -839,6 +833,10 @@
             "fetchedAt": {
               "type": "string",
               "format": "date-time"
+            },
+            "timezone": {
+              "type": "string",
+              "minLength": 1
             },
             "revision": {
               "type": "integer",

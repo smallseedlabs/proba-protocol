@@ -45,15 +45,30 @@ export const auditCostSchema = z
     message: 'currency and amount must be provided together',
   });
 
+/**
+ * OpenTelemetry-style span id: exactly 16 lowercase hex characters, not all
+ * zeros (the all-zero id is invalid in OpenTelemetry).
+ */
+export const SPAN_ID_PATTERN = /^[0-9a-f]{16}$/;
+
+export const spanIdSchema = z
+  .string()
+  .regex(SPAN_ID_PATTERN)
+  .refine((id) => id !== '0000000000000000', { message: 'spanId must not be all zeros' });
+
 /** Dotted, lower-case action name with at least two segments, e.g. "command.received". */
 export const AUDIT_ACTION_PATTERN = /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/;
 
+// Timestamp rule (all schemas in this module): ISO 8601 / RFC 3339, UTC, trailing
+// "Z", millisecond precision as produced by Date.toISOString(). Offsets such as
+// +01:00 are rejected. Services store and send UTC only; UIs convert to local
+// time for display.
 export const auditEventSchema = z.object({
   version: z.literal(1),
   eventId: z.string().uuid(),
   traceId: z.string().uuid(),
-  spanId: z.string().min(1).max(64),
-  parentSpanId: z.string().min(1).max(64).optional(),
+  spanId: spanIdSchema,
+  parentSpanId: spanIdSchema.optional(),
   workspaceId: z.string().min(1),
   userId: z.string().uuid().optional(),
   goalId: z.string().uuid().optional(),
@@ -70,6 +85,7 @@ export const auditEventSchema = z.object({
   riskLevel: auditRiskLevelSchema.optional(),
   cost: auditCostSchema.optional(),
   durationMs: z.number().nonnegative().optional(),
+  // ISO 8601 / RFC 3339, UTC, trailing Z (e.g. Date.toISOString()); offsets are rejected.
   occurredAt: z.string().datetime(),
   details: z.record(z.unknown()),
   tags: z.array(z.string().min(1)).optional(),
@@ -80,6 +96,7 @@ const sha256HexSchema = z.string().regex(/^[0-9a-f]{64}$/);
 export const storedAuditEventSchema = auditEventSchema.extend({
   prevHash: sha256HexSchema.nullable(),
   hash: sha256HexSchema,
+  // Same timestamp rule as occurredAt: UTC with trailing Z.
   ingestedAt: z.string().datetime(),
   schemaVersion: z.number().int().positive(),
 });
