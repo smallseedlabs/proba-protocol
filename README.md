@@ -166,7 +166,7 @@ Producers emit `AuditEvent`s. The audit consumer stores them as `StoredAuditEven
 ```typescript
 const event = buildAuditEvent({
   traceId: command.clientMsgId, // root of the trace: the web command's clientMsgId, or a job run id
-  workspaceId: 'default',
+  workspaceId: 'seedbed',
   userId,
   threadId,
   actor: { type: 'user', id: userId },
@@ -209,7 +209,114 @@ if (!result.success) console.error(result.error.issues);
 
 **Rule for `details`: no secrets and no raw personal data.** Never put API keys, tokens, passwords, cookies, auth headers or platform credentials in an audit event, and refer to people and records by id, not by name, email or free text. This rule is documentation only: validation does not inspect keys or values, so producers are responsible for it.
 
-`AUDIT_ACTIONS` lists recommended action names per category (for example `command.received`, `policy.denied`). It is a suggestion, not an allow-list: any dotted lower-case action validates.
+#### Action catalog
+
+Actions are dotted, lower-case and shaped `<domain>.<verb_or_event>`. The first segment is the *domain*; the `category` field is the fixed, coarser enum above (consumers index on it), so a domain need not equal a category: `goal.created` is category `data_access`, `control.paused` is category `config`, `stream.connected` is category `data_access`.
+
+The catalog is a recommendation, not an allow-list: any dotted lower-case action validates, and every action published in an earlier version stays valid (the catalog only grows). Exports (from the package root or `/audit`):
+
+- `AUDIT_ACTIONS`: action names grouped by domain (`AUDIT_ACTIONS.goal`, `AUDIT_ACTIONS.control`, ...). The 11 category names are still keys, so `AUDIT_ACTIONS[category]` keeps working.
+- `AUDIT_ACTION_INFO`: per action the recommended `category`, default `riskLevel`, `status` and `description`, plus `preferred` for generic and alias actions.
+- `isKnownAuditAction(action)` (type guard to `AuditActionName`) and `getAuditActionInfo(action)`.
+- Types `AuditActionName`, `AuditActionDomain`, `AuditActionInfo`, `AuditActionStatus`.
+
+`status` is `specific` (the preferred name for what happened), `generic` (still valid, but too broad: use a `preferred` action when one fits) or `alias` (same meaning as its single `preferred` action, kept for compatibility). Default risk levels are recommendations; a producer may raise or lower the level for a given event. Never put secrets or raw personal data in `details` (see above).
+
+| Action | Category | Risk | Status | Use instead |
+|---|---|---|---|---|
+| `command.received` | `command` | low | specific |  |
+| `command.accepted` | `command` | low | specific |  |
+| `command.rejected` | `command` | low | specific |  |
+| `command.processed` | `command` | low | specific |  |
+| `command.duplicate` | `command` | low | specific |  |
+| `thread.created` | `command` | low | specific |  |
+| `thread.message_received` | `command` | low | specific |  |
+| `thread.access_denied` | `policy` | medium | specific |  |
+| `goal.created` | `data_access` | low | specific |  |
+| `goal.updated` | `data_access` | low | specific |  |
+| `goal.status_changed` | `data_access` | low | specific |  |
+| `goal.clarification_answered` | `data_access` | low | specific |  |
+| `goal.budget_proposed` | `policy` | medium | specific |  |
+| `goal.budget_approved` | `approval` | medium | specific |  |
+| `goal.budget_declined` | `approval` | low | specific |  |
+| `budget.evaluated` | `policy` | medium | specific |  |
+| `budget.limit_reached` | `policy` | high | specific |  |
+| `brain.llm_call` | `brain` | low | specific |  |
+| `brain.reply_generated` | `brain` | low | specific |  |
+| `brain.explanation_generated` | `brain` | low | specific |  |
+| `brain.clarification_requested` | `brain` | low | specific |  |
+| `brain.clarify_requested` | `brain` | low | alias | `brain.clarification_requested` |
+| `brain.plan_created` | `brain` | low | specific |  |
+| `brain.decision_made` | `brain` | medium | specific |  |
+| `brain.error` | `brain` | medium | specific |  |
+| `tool.proposed` | `tool` | low | specific |  |
+| `tool.executed` | `tool` | medium | specific |  |
+| `tool.failed` | `tool` | medium | specific |  |
+| `tool.called` | `tool` | low | generic | `tool.proposed`, `tool.executed` |
+| `tool.completed` | `tool` | medium | alias | `tool.executed` |
+| `policy.evaluated` | `policy` | low | generic | `budget.evaluated` |
+| `policy.allowed` | `policy` | low | specific |  |
+| `policy.denied` | `policy` | medium | generic | `thread.access_denied` |
+| `approval.requested` | `approval` | low | specific |  |
+| `approval.granted` | `approval` | medium | specific |  |
+| `approval.rejected` | `approval` | low | specific |  |
+| `approval.expired` | `approval` | low | specific |  |
+| `control.paused` | `config` | medium | specific |  |
+| `control.resumed` | `config` | medium | specific |  |
+| `control.emergency_stopped` | `config` | high | specific |  |
+| `control.killed` | `config` | high | specific |  |
+| `stream.connected` | `data_access` | low | specific |  |
+| `stream.disconnected` | `data_access` | low | specific |  |
+| `auth.sign_in` | `auth` | low | specific |  |
+| `auth.sign_out` | `auth` | low | specific |  |
+| `auth.session_issued` | `auth` | low | specific |  |
+| `auth.session_revoked` | `auth` | low | specific |  |
+| `auth.session_expired` | `auth` | low | specific |  |
+| `auth.denied` | `auth` | medium | specific |  |
+| `data_access.read` | `data_access` | low | generic | `stream.connected`, `stream.disconnected`, `memory.retrieved` |
+| `data_access.write` | `data_access` | low | generic | `goal.created`, `goal.updated`, `goal.status_changed`, `goal.clarification_answered` |
+| `data_access.export` | `data_access` | high | specific |  |
+| `data_access.delete` | `data_access` | medium | specific |  |
+| `memory.ingested` | `memory` | low | specific |  |
+| `memory.promoted` | `memory` | low | specific |  |
+| `memory.consolidated` | `memory` | low | specific |  |
+| `memory.decayed` | `memory` | low | specific |  |
+| `memory.retrieved` | `memory` | low | specific |  |
+| `memory.read` | `memory` | low | generic | `memory.retrieved` |
+| `memory.write` | `memory` | low | generic | `memory.ingested` |
+| `memory.delete` | `memory` | medium | specific |  |
+| `metrics.fetch_started` | `metrics` | low | specific |  |
+| `metrics.fetch_completed` | `metrics` | low | specific |  |
+| `metrics.fetch_failed` | `metrics` | medium | specific |  |
+| `metrics.ingested` | `metrics` | low | specific |  |
+| `metrics.restated` | `metrics` | low | specific |  |
+| `metrics.rollup_run` | `metrics` | low | specific |  |
+| `metrics.observation_stored` | `metrics` | low | alias | `metrics.ingested` |
+| `config.changed` | `config` | medium | generic | `control.paused`, `control.resumed`, `control.emergency_stopped`, `control.killed` |
+| `config.loaded` | `config` | low | specific |  |
+| `system.started` | `system` | low | specific |  |
+| `system.stopped` | `system` | low | specific |  |
+| `system.job_run` | `system` | low | specific |  |
+| `system.job_failed` | `system` | medium | specific |  |
+| `system.error` | `system` | medium | specific |  |
+
+**Moving from generic names to specific ones** (both stay valid; new code should use the right-hand side):
+
+| Instead of | Emit |
+|------------|------|
+| `data_access.write` for goal changes | `goal.created`, `goal.updated`, `goal.status_changed`, `goal.clarification_answered` |
+| `data_access.read` for SSE connect / disconnect | `stream.connected`, `stream.disconnected` |
+| `policy.evaluated` with a budget (`enforced: false`) | `budget.evaluated`; `budget.limit_reached` when a limit is hit |
+| `policy.denied` for thread ownership | `thread.access_denied` |
+| `config.changed` for pause / resume / stop / kill | `control.paused`, `control.resumed`, `control.emergency_stopped`, `control.killed` |
+| `tool.called` | `tool.proposed` (not run yet) or `tool.executed` (ran) |
+| `tool.completed` (alias) | `tool.executed` |
+| `brain.clarify_requested` (alias) | `brain.clarification_requested` |
+| a reply only inside the `brain.llm_call` summary | `brain.reply_generated` / `brain.explanation_generated` (keep `brain.llm_call` for the invocation itself) |
+| `memory.read` / `memory.write` | `memory.retrieved` / `memory.ingested` |
+| `metrics.observation_stored` (alias) | `metrics.ingested` |
+
+`control.emergency_stopped` halts everything in its scope (usually the workspace) at once; `control.killed` terminates a single goal, run or agent for good. Put the scope in `target` and `details.scope`.
 
 **Stored form.** `StoredAuditEvent` extends `AuditEvent` with `prevHash` (`string | null`, null for the first event), `hash`, `ingestedAt` and `schemaVersion`. Producers never set these; the audit consumer adds them when it appends the event to the hash chain. `canonicalizeAuditEvent(event)` returns the canonical JSON (keys sorted recursively, `undefined` omitted, no whitespace) that the consumer can hash. The hash algorithm and the chaining rule belong to the consumer and are not implemented here.
 
