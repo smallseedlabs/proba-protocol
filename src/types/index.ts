@@ -7,3 +7,5 @@ export * from './command.js';
 export * from './event.js';
 export * from './ui.js';
 export * from './brain.js';
+export * from './audit.js';
+export * from './metrics.js';

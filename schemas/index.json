@@ -314,6 +314,556 @@
         }
       },
       "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "AuditEvent": {
+      "$ref": "#/definitions/AuditEvent",
+      "definitions": {
+        "AuditEvent": {
+          "type": "object",
+          "properties": {
+            "version": {
+              "type": "number",
+              "const": 1
+            },
+            "eventId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "traceId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "spanId": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{16}$"
+            },
+            "parentSpanId": {
+              "$ref": "#/definitions/AuditEvent/properties/spanId"
+            },
+            "workspaceId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "userId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "goalId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "threadId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "campaignId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "actor": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "user",
+                    "brain",
+                    "system",
+                    "service"
+                  ]
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "type",
+                "id"
+              ],
+              "additionalProperties": false
+            },
+            "service": {
+              "type": "string",
+              "minLength": 1
+            },
+            "action": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+            },
+            "category": {
+              "type": "string",
+              "enum": [
+                "command",
+                "brain",
+                "tool",
+                "policy",
+                "approval",
+                "data_access",
+                "memory",
+                "metrics",
+                "auth",
+                "config",
+                "system"
+              ]
+            },
+            "target": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "type",
+                "id"
+              ],
+              "additionalProperties": false
+            },
+            "outcome": {
+              "type": "string",
+              "enum": [
+                "success",
+                "failure",
+                "denied",
+                "partial"
+              ]
+            },
+            "errorCode": {
+              "type": "string",
+              "minLength": 1
+            },
+            "errorMessage": {
+              "type": "string"
+            },
+            "riskLevel": {
+              "type": "string",
+              "enum": [
+                "low",
+                "medium",
+                "high"
+              ]
+            },
+            "cost": {
+              "type": "object",
+              "properties": {
+                "tokensIn": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "tokensOut": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "currency": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 3
+                },
+                "amount": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              },
+              "additionalProperties": false
+            },
+            "durationMs": {
+              "type": "number",
+              "minimum": 0
+            },
+            "occurredAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "details": {
+              "type": "object",
+              "additionalProperties": {}
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "required": [
+            "version",
+            "eventId",
+            "traceId",
+            "spanId",
+            "workspaceId",
+            "actor",
+            "service",
+            "action",
+            "category",
+            "outcome",
+            "occurredAt",
+            "details"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "StoredAuditEvent": {
+      "$ref": "#/definitions/StoredAuditEvent",
+      "definitions": {
+        "StoredAuditEvent": {
+          "type": "object",
+          "properties": {
+            "version": {
+              "type": "number",
+              "const": 1
+            },
+            "eventId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "traceId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "spanId": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{16}$"
+            },
+            "parentSpanId": {
+              "$ref": "#/definitions/StoredAuditEvent/properties/spanId"
+            },
+            "workspaceId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "userId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "goalId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "threadId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "campaignId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "actor": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "user",
+                    "brain",
+                    "system",
+                    "service"
+                  ]
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "type",
+                "id"
+              ],
+              "additionalProperties": false
+            },
+            "service": {
+              "type": "string",
+              "minLength": 1
+            },
+            "action": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+            },
+            "category": {
+              "type": "string",
+              "enum": [
+                "command",
+                "brain",
+                "tool",
+                "policy",
+                "approval",
+                "data_access",
+                "memory",
+                "metrics",
+                "auth",
+                "config",
+                "system"
+              ]
+            },
+            "target": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "type",
+                "id"
+              ],
+              "additionalProperties": false
+            },
+            "outcome": {
+              "type": "string",
+              "enum": [
+                "success",
+                "failure",
+                "denied",
+                "partial"
+              ]
+            },
+            "errorCode": {
+              "type": "string",
+              "minLength": 1
+            },
+            "errorMessage": {
+              "type": "string"
+            },
+            "riskLevel": {
+              "type": "string",
+              "enum": [
+                "low",
+                "medium",
+                "high"
+              ]
+            },
+            "cost": {
+              "type": "object",
+              "properties": {
+                "tokensIn": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "tokensOut": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "currency": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 3
+                },
+                "amount": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              },
+              "additionalProperties": false
+            },
+            "durationMs": {
+              "type": "number",
+              "minimum": 0
+            },
+            "occurredAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "details": {
+              "type": "object",
+              "additionalProperties": {}
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "prevHash": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "hash": {
+              "$ref": "#/definitions/StoredAuditEvent/properties/prevHash/anyOf/0"
+            },
+            "ingestedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "schemaVersion": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": [
+            "version",
+            "eventId",
+            "traceId",
+            "spanId",
+            "workspaceId",
+            "actor",
+            "service",
+            "action",
+            "category",
+            "outcome",
+            "occurredAt",
+            "details",
+            "prevHash",
+            "hash",
+            "ingestedAt",
+            "schemaVersion"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "MetricObservation": {
+      "$ref": "#/definitions/MetricObservation",
+      "definitions": {
+        "MetricObservation": {
+          "type": "object",
+          "properties": {
+            "version": {
+              "type": "number",
+              "const": 1
+            },
+            "platform": {
+              "type": "string",
+              "enum": [
+                "meta",
+                "google",
+                "reddit",
+                "x",
+                "microsoft",
+                "other"
+              ]
+            },
+            "accountId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "campaignId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "adsetId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "adId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "granularity": {
+              "type": "string",
+              "enum": [
+                "hour",
+                "day"
+              ]
+            },
+            "periodStart": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "periodEnd": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "metrics": {
+              "type": "object",
+              "properties": {
+                "impressions": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "clicks": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "spend": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "conversions": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "reach": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "videoViews": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "revenue": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "impressions",
+                "clicks",
+                "spend",
+                "conversions"
+              ],
+              "additionalProperties": false
+            },
+            "currency": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 3
+            },
+            "fetchedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "timezone": {
+              "type": "string",
+              "minLength": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "sourceRef": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "version",
+            "platform",
+            "accountId",
+            "campaignId",
+            "granularity",
+            "periodStart",
+            "periodEnd",
+            "metrics",
+            "currency",
+            "fetchedAt",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
     }
   }
 }
