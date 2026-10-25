@@ -241,6 +241,15 @@ The catalog is a recommendation, not an allow-list: any dotted lower-case action
 | `goal.budget_declined` | `approval` | low | specific |  |
 | `budget.evaluated` | `policy` | medium | specific |  |
 | `budget.limit_reached` | `policy` | high | specific |  |
+| `campaign.created` | `command` | low | specific | |
+| `campaign.launched` | `command` | high | specific | |
+| `campaign.paused` | `command` | medium | specific | |
+| `campaign.resumed` | `command` | medium | specific | |
+| `campaign.stopped` | `command` | medium | specific | |
+| `campaign.budget_changed` | `policy` | high | specific | |
+| `campaign.synced` | `metrics` | low | specific | |
+| `campaign.sync_failed` | `metrics` | medium | specific | |
+| `campaign.metrics_attributed` | `metrics` | low | specific | |
 | `brain.llm_call` | `brain` | low | specific |  |
 | `brain.reply_generated` | `brain` | low | specific |  |
 | `brain.explanation_generated` | `brain` | low | specific |  |
