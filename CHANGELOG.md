@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.3] - 2026-10-26
+
+### Added
+
+- Optional raw text on an audit event, additive and backwards compatible (events without it stay valid; older consumers that validate with 0.3.2 ignore the field):
+  - `AuditEvent.content?: AuditContent` with `kind` (open snake_case string; recommended `user_message`, `brain_reply`, `brain_clarification`, `explanation`, `prompt` in `AUDIT_CONTENT_KINDS`), `text` (at most `AUDIT_CONTENT_MAX_CHARS` = 16384 UTF-16 code units), `truncated`, `originalLength` (consistent with `text` and `truncated`) and `redactions` (how many secrets were masked)
+  - `StoredAuditEvent.contentDigest?`: SHA-256 hex of `canonicalizeAuditContent(content)`, set by the consumer so the chain can cover the text without holding it
+  - `auditContentSchema`, `buildAuditContent` (truncates without splitting a surrogate pair), `canonicalizeAuditContent`, `AUDIT_CONTENT_KIND_PATTERN`; JSON Schema bundle regenerated (`content`, `contentDigest`)
+  - Rules in the README: producers mask secrets before setting `content`; `details` still never carries text
+
 ## [0.3.2] - 2026-10-26
 
 ### Added

@@ -490,6 +490,38 @@
                 "type": "string",
                 "minLength": 1
               }
+            },
+            "content": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]{0,63}$"
+                },
+                "text": {
+                  "type": "string",
+                  "maxLength": 16384
+                },
+                "truncated": {
+                  "type": "boolean"
+                },
+                "originalLength": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "redactions": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "kind",
+                "text",
+                "truncated",
+                "originalLength",
+                "redactions"
+              ],
+              "additionalProperties": false
             }
           },
           "required": [
@@ -687,6 +719,38 @@
                 "minLength": 1
               }
             },
+            "content": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]{0,63}$"
+                },
+                "text": {
+                  "type": "string",
+                  "maxLength": 16384
+                },
+                "truncated": {
+                  "type": "boolean"
+                },
+                "originalLength": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "redactions": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "kind",
+                "text",
+                "truncated",
+                "originalLength",
+                "redactions"
+              ],
+              "additionalProperties": false
+            },
             "prevHash": {
               "anyOf": [
                 {
@@ -708,6 +772,9 @@
             "schemaVersion": {
               "type": "integer",
               "exclusiveMinimum": 0
+            },
+            "contentDigest": {
+              "$ref": "#/definitions/StoredAuditEvent/properties/prevHash/anyOf/0"
             }
           },
           "required": [
