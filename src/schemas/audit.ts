@@ -3,6 +3,7 @@
  */
 
 import { z } from 'zod';
+import { AUDIT_CONTENT_MAX_CHARS } from '../types/audit.js';
 
 export const auditActorTypeSchema = z.enum(['user', 'brain', 'system', 'service']);
 
@@ -43,6 +44,22 @@ export const auditCostSchema = z
   })
   .refine((cost) => (cost.currency === undefined) === (cost.amount === undefined), {
     message: 'currency and amount must be provided together',
+  });
+
+/** Lower-case snake_case, e.g. "user_message". Open set: see AUDIT_CONTENT_KINDS. */
+export const AUDIT_CONTENT_KIND_PATTERN = /^[a-z][a-z0-9_]{0,63}$/;
+
+export const auditContentSchema = z
+  .object({
+    kind: z.string().regex(AUDIT_CONTENT_KIND_PATTERN),
+    text: z.string().max(AUDIT_CONTENT_MAX_CHARS),
+    truncated: z.boolean(),
+    originalLength: z.number().int().nonnegative(),
+    redactions: z.number().int().nonnegative(),
+  })
+  .refine((c) => (c.truncated ? c.originalLength > c.text.length : c.originalLength === c.text.length), {
+    message: 'originalLength must equal text.length unless truncated, and exceed it when truncated',
+    path: ['originalLength'],
   });
 
 /**
@@ -89,6 +106,7 @@ export const auditEventSchema = z.object({
   occurredAt: z.string().datetime(),
   details: z.record(z.unknown()),
   tags: z.array(z.string().min(1)).optional(),
+  content: auditContentSchema.optional(),
 });
 
 const sha256HexSchema = z.string().regex(/^[0-9a-f]{64}$/);
@@ -99,6 +117,7 @@ export const storedAuditEventSchema = auditEventSchema.extend({
   // Same timestamp rule as occurredAt: UTC with trailing Z.
   ingestedAt: z.string().datetime(),
   schemaVersion: z.number().int().positive(),
+  contentDigest: sha256HexSchema.optional(),
 });
 
 export type AuditEventInput = z.input<typeof auditEventSchema>;
