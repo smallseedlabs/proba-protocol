@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2026-10-26
+
+### Added
+
+- Read-side actions for the audit trail and the metrics (additive; no category, schema or JSON Schema change; all category `data_access`, risk `low`): `audit.searched`, `audit.trace_viewed`, `audit.event_viewed`, `audit.integrity_checked`, `analytics.queried`, `analytics.compared`
+  - New domains `audit` and `analytics` in `AUDIT_ACTIONS`, described in `AUDIT_ACTION_INFO`; README catalog and generic-to-specific mapping updated
+  - Memory needed nothing new: reads are `memory.retrieved` (already specific)
+
+### Changed
+
+- `data_access.read` (still generic and still valid) now also lists the new actions among its `preferred` replacements
+
 ## [0.3.1] - 2026-10-25
 
 ### Added

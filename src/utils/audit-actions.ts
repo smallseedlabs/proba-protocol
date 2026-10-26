@@ -62,6 +62,8 @@ export const AUDIT_ACTIONS = {
   control: ['control.paused', 'control.resumed', 'control.emergency_stopped', 'control.killed'],
   stream: ['stream.connected', 'stream.disconnected'],
   auth: ['auth.sign_in', 'auth.sign_out', 'auth.session_issued', 'auth.session_revoked', 'auth.session_expired', 'auth.denied'],
+  audit: ['audit.searched', 'audit.trace_viewed', 'audit.event_viewed', 'audit.integrity_checked'],
+  analytics: ['analytics.queried', 'analytics.compared'],
   data_access: ['data_access.read', 'data_access.write', 'data_access.export', 'data_access.delete'],
   memory: [
     'memory.ingested',
@@ -208,8 +210,18 @@ export const AUDIT_ACTION_INFO: Record<AuditActionName, AuditActionInfo> = {
   'auth.session_expired': info('auth', 'low', 'A session expired or was rejected as expired.'),
   'auth.denied': info('auth', 'medium', 'Authentication or authorisation was refused (outcome failure or denied).'),
 
+  // audit (reads of the audit trail itself)
+  'audit.searched': info('data_access', 'low', 'The audit trail was searched or listed (events, traces, facets). Details: operation, filter names, result count; never the returned data.'),
+  'audit.trace_viewed': info('data_access', 'low', 'One trace was read as a span tree (target: the trace id).'),
+  'audit.event_viewed': info('data_access', 'low', 'One audit event was read by id (target: the event id).'),
+  'audit.integrity_checked': info('data_access', 'low', 'The hash chain of the audit trail was verified over a time range (details: range, events checked, ok).'),
+
+  // analytics (reads of the metrics rollups)
+  'analytics.queried': info('data_access', 'low', 'Metrics were queried (summary, campaigns). Details: filter names, result size; never the numbers.'),
+  'analytics.compared': info('data_access', 'low', 'Two periods of metrics were compared. Details: filter names, result size; never the numbers.'),
+
   // data_access
-  'data_access.read': info('data_access', 'low', 'Generic: data was read. Use stream.connected for SSE, memory.retrieved for memory.', { status: 'generic', preferred: ['stream.connected', 'stream.disconnected', 'memory.retrieved'] }),
+  'data_access.read': info('data_access', 'low', 'Generic: data was read. Use stream.connected for SSE, memory.retrieved for memory, audit.* for the audit trail, analytics.* for metrics.', { status: 'generic', preferred: ['stream.connected', 'stream.disconnected', 'memory.retrieved', 'audit.searched', 'audit.trace_viewed', 'audit.event_viewed', 'audit.integrity_checked', 'analytics.queried', 'analytics.compared'] }),
   'data_access.write': info('data_access', 'low', 'Generic: data was written. Use the goal.* actions for goals.', { status: 'generic', preferred: ['goal.created', 'goal.updated', 'goal.status_changed', 'goal.clarification_answered'] }),
   'data_access.export': info('data_access', 'high', 'Data left the system (export or download).'),
   'data_access.delete': info('data_access', 'medium', 'Data was deleted.'),

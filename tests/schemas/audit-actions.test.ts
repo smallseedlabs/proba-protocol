@@ -49,6 +49,12 @@ const CAMPAIGN_ACTIONS = [
   'campaign.budget_changed', 'campaign.synced', 'campaign.sync_failed', 'campaign.metrics_attributed',
 ];
 
+/** Added in 0.3.2: reads of the audit trail and of the metrics. */
+const READ_ACTIONS = [
+  'audit.searched', 'audit.trace_viewed', 'audit.event_viewed', 'audit.integrity_checked',
+  'analytics.queried', 'analytics.compared',
+];
+
 const ALL = Object.values(AUDIT_ACTIONS).flat() as AuditActionName[];
 const SHAPE = /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/;
 
@@ -94,6 +100,20 @@ describe('AUDIT_ACTIONS catalog', () => {
   it('should rate launching and budget changes high risk', () => {
     expect(AUDIT_ACTION_INFO['campaign.launched'].riskLevel).toBe('high');
     expect(AUDIT_ACTION_INFO['campaign.budget_changed'].riskLevel).toBe('high');
+  });
+
+  it('should contain the read actions: specific, category data_access, risk low', () => {
+    expect([...AUDIT_ACTIONS.audit, ...AUDIT_ACTIONS.analytics]).toEqual(READ_ACTIONS);
+    for (const action of READ_ACTIONS) {
+      const entry = AUDIT_ACTION_INFO[action as AuditActionName];
+      expect(entry.status).toBe('specific');
+      expect(entry.category).toBe('data_access');
+      expect(entry.riskLevel).toBe('low');
+    }
+  });
+
+  it('should offer the read actions as replacements for the generic data_access.read', () => {
+    for (const action of READ_ACTIONS) expect(AUDIT_ACTION_INFO['data_access.read'].preferred).toContain(action);
   });
 
   it('should validate every action (with its recommended category) as an AuditEvent', () => {
