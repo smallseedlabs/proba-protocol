@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-10-25
+
+### Added
+
+- `campaign.*` action domain (additive; no category, schema or JSON Schema change): `campaign.created`, `campaign.launched`, `campaign.paused`, `campaign.resumed`, `campaign.stopped`, `campaign.budget_changed`, `campaign.synced`, `campaign.sync_failed`, `campaign.metrics_attributed`
+  - Lifecycle actions map to category `command` (`campaign.launched` is high risk, pause/resume/stop medium), `campaign.budget_changed` to `policy` (high risk), the sync and attribution actions to `metrics`
+  - Listed in `AUDIT_ACTIONS.campaign` and described in `AUDIT_ACTION_INFO`; README catalog updated
+
 ## [0.3.0] - 2026-10-25
 
 ### Added

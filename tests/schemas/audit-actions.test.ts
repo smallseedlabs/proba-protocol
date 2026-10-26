@@ -43,6 +43,12 @@ const REQUESTED_ACTIONS = [
   'config.changed',
 ];
 
+/** Added in 0.3.1. */
+const CAMPAIGN_ACTIONS = [
+  'campaign.created', 'campaign.launched', 'campaign.paused', 'campaign.resumed', 'campaign.stopped',
+  'campaign.budget_changed', 'campaign.synced', 'campaign.sync_failed', 'campaign.metrics_attributed',
+];
+
 const ALL = Object.values(AUDIT_ACTIONS).flat() as AuditActionName[];
 const SHAPE = /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/;
 
@@ -71,6 +77,23 @@ describe('AUDIT_ACTIONS catalog', () => {
 
   it('should contain every action requested for the catalog', () => {
     for (const action of REQUESTED_ACTIONS) expect(ALL).toContain(action);
+  });
+
+  it('should contain the campaign actions, none of them generic or alias', () => {
+    expect([...AUDIT_ACTIONS.campaign]).toEqual(CAMPAIGN_ACTIONS);
+    for (const action of CAMPAIGN_ACTIONS) expect(AUDIT_ACTION_INFO[action as AuditActionName].status).toBe('specific');
+  });
+
+  it('should map campaign actions to existing categories: lifecycle to command, budget to policy, sync to metrics', () => {
+    const category = (a: string) => AUDIT_ACTION_INFO[a as AuditActionName].category;
+    for (const a of ['campaign.created', 'campaign.launched', 'campaign.paused', 'campaign.resumed', 'campaign.stopped']) expect(category(a)).toBe('command');
+    expect(category('campaign.budget_changed')).toBe('policy');
+    for (const a of ['campaign.synced', 'campaign.sync_failed', 'campaign.metrics_attributed']) expect(category(a)).toBe('metrics');
+  });
+
+  it('should rate launching and budget changes high risk', () => {
+    expect(AUDIT_ACTION_INFO['campaign.launched'].riskLevel).toBe('high');
+    expect(AUDIT_ACTION_INFO['campaign.budget_changed'].riskLevel).toBe('high');
   });
 
   it('should validate every action (with its recommended category) as an AuditEvent', () => {
@@ -141,7 +164,7 @@ describe('AUDIT_ACTION_INFO', () => {
   });
 
   it('should rate emergency stops, kills and budget limits high risk', () => {
-    for (const action of ['control.emergency_stopped', 'control.killed', 'budget.limit_reached', 'data_access.export'] as const) {
+    for (const action of ['control.emergency_stopped', 'control.killed', 'budget.limit_reached', 'data_access.export', 'campaign.launched', 'campaign.budget_changed'] as const) {
       expect(AUDIT_ACTION_INFO[action].riskLevel).toBe('high');
     }
   });
