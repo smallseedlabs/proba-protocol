@@ -206,8 +206,31 @@ if (!result.success) console.error(result.error.issues);
 | `occurredAt` | UTC ISO 8601 datetime (trailing `Z`) | yes | When the action happened; defaulted to now. See Timestamps |
 | `details` | `Record<string, unknown>` | yes | Defaulted to `{}`. See the rule below |
 | `tags` | string[] | no | |
+| `content` | `{ kind, text, truncated, originalLength, redactions }` | no | Raw text (since 0.3.3). See "Raw text (`content`)" below |
 
 **Rule for `details`: no secrets and no raw personal data.** Never put API keys, tokens, passwords, cookies, auth headers or platform credentials in an audit event, and refer to people and records by id, not by name, email or free text. This rule is documentation only: validation does not inspect keys or values, so producers are responsible for it.
+
+#### Raw text (`content`)
+
+Since 0.3.3 an event may carry the raw text behind it, for people who read the trail (for example in the portal): a user's message, a brain reply, a clarification question, an explanation or a prompt. It is the only place where text travels; `details` still never carries it.
+
+```typescript
+const text = maskSecrets(message.text); // the producer's masking: passwords, tokens, API keys, card numbers
+const event = buildAuditEvent({
+  /* ... */ action: 'thread.message_received',
+  content: buildAuditContent('user_message', text.masked, { redactions: text.count }),
+});
+```
+
+| Field | Notes |
+|-------|-------|
+| `kind` | `user_message`, `brain_reply`, `brain_clarification`, `explanation`, `prompt` (`AUDIT_CONTENT_KINDS`), or another lower-case snake_case name; consumers must tolerate unknown kinds |
+| `text` | At most `AUDIT_CONTENT_MAX_CHARS` (16384) UTF-16 code units, secrets already masked by the producer |
+| `truncated` | `true` when the text was cut; `buildAuditContent` cuts without splitting a surrogate pair |
+| `originalLength` | Length before truncation; equals `text.length` unless truncated (validated) |
+| `redactions` | How many secrets were masked |
+
+The field is optional and additive: events without it stay valid. The consumer stores the text apart from the event and records `StoredAuditEvent.contentDigest`, the SHA-256 of `canonicalizeAuditContent(content)`, which the hash chain covers, so altering or removing text is detectable without keeping the text in the chain. Masking is not done by this library (it is I/O-free and has no opinion on what a secret is): a producer that sets `content` must mask first.
 
 #### Action catalog
 
