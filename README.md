@@ -282,7 +282,13 @@ The catalog is a recommendation, not an allow-list: any dotted lower-case action
 | `auth.session_revoked` | `auth` | low | specific |  |
 | `auth.session_expired` | `auth` | low | specific |  |
 | `auth.denied` | `auth` | medium | specific |  |
-| `data_access.read` | `data_access` | low | generic | `stream.connected`, `stream.disconnected`, `memory.retrieved` |
+| `audit.searched` | `data_access` | low | specific | |
+| `audit.trace_viewed` | `data_access` | low | specific | |
+| `audit.event_viewed` | `data_access` | low | specific | |
+| `audit.integrity_checked` | `data_access` | low | specific | |
+| `analytics.queried` | `data_access` | low | specific | |
+| `analytics.compared` | `data_access` | low | specific | |
+| `data_access.read` | `data_access` | low | generic | `stream.connected`, `stream.disconnected`, `memory.retrieved`, `audit.searched`, `audit.trace_viewed`, `audit.event_viewed`, `audit.integrity_checked`, `analytics.queried`, `analytics.compared` |
 | `data_access.write` | `data_access` | low | generic | `goal.created`, `goal.updated`, `goal.status_changed`, `goal.clarification_answered` |
 | `data_access.export` | `data_access` | high | specific |  |
 | `data_access.delete` | `data_access` | medium | specific |  |
@@ -315,6 +321,10 @@ The catalog is a recommendation, not an allow-list: any dotted lower-case action
 |------------|------|
 | `data_access.write` for goal changes | `goal.created`, `goal.updated`, `goal.status_changed`, `goal.clarification_answered` |
 | `data_access.read` for SSE connect / disconnect | `stream.connected`, `stream.disconnected` |
+| `data_access.read` for a search or listing of the audit trail | `audit.searched` |
+| `data_access.read` for one trace or one event of the audit trail | `audit.trace_viewed`, `audit.event_viewed` |
+| `data_access.read` for a hash-chain verification | `audit.integrity_checked` |
+| `data_access.read` / `data_access.metrics_*` for metrics queries | `analytics.queried`, `analytics.compared` |
 | `policy.evaluated` with a budget (`enforced: false`) | `budget.evaluated`; `budget.limit_reached` when a limit is hit |
 | `policy.denied` for thread ownership | `thread.access_denied` |
 | `config.changed` for pause / resume / stop / kill | `control.paused`, `control.resumed`, `control.emergency_stopped`, `control.killed` |
