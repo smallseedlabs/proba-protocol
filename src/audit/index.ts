@@ -10,6 +10,7 @@ export * from '../types/audit.js';
 export * from '../types/metrics.js';
 export * from '../schemas/audit.js';
 export * from '../schemas/metrics.js';
+export * from '../schemas/context.js';
 export * from '../builders/audit.js';
 export * from '../utils/audit.js';
 export * from '../utils/audit-actions.js';

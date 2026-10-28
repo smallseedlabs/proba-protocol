@@ -1,0 +1,82 @@
+{
+  "packetId": "990e8400-e29b-41d4-a716-446655440004",
+  "packetHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "traceId": "550e8400-e29b-41d4-a716-446655440000",
+  "workspaceId": "seedbed",
+  "userId": "660e8400-e29b-41d4-a716-446655440001",
+  "goalId": "770e8400-e29b-41d4-a716-446655440002",
+  "stepId": "step-propose-budget-1",
+  "configVersion": "1",
+  "templateVersion": "1",
+  "sections": [
+    {
+      "kind": "policy",
+      "priority": 0,
+      "tokens": 32,
+      "items": [
+        {
+          "itemId": "pol-spend-cap",
+          "sourceRef": { "source": "policy", "id": "default" },
+          "trust": "system",
+          "text": "Spend above 100 GBP per day needs approval.",
+          "observedAt": "2026-10-28T00:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "priority": 0,
+      "tokens": 24,
+      "items": [
+        {
+          "itemId": "goal-state",
+          "sourceRef": { "source": "hub.task", "id": "770e8400-e29b-41d4-a716-446655440002" },
+          "trust": "system",
+          "data": { "status": "active", "currency": "GBP" },
+          "observedAt": "2026-10-28T00:00:00.000Z"
+        }
+      ]
+    }
+  ],
+  "gaps": [
+    {
+      "code": "no_analytics_for_campaign",
+      "source": "analytics",
+      "reason": "No campaign metrics for this goal in the last 7 days.",
+      "suggestedQuestion": "Which campaign should I raise the budget on?"
+    }
+  ],
+  "manifest": {
+    "sources": {
+      "policy": {
+        "requested": true,
+        "returned": 1,
+        "included": 1,
+        "dropped": 0,
+        "droppedReasons": {},
+        "cacheHit": false,
+        "latencyMs": 1,
+        "tokens": 32
+      },
+      "analytics": {
+        "requested": true,
+        "returned": 0,
+        "included": 0,
+        "dropped": 0,
+        "droppedReasons": {},
+        "cacheHit": false,
+        "latencyMs": 18,
+        "tokens": 0
+      }
+    },
+    "totals": {
+      "returned": 2,
+      "included": 2,
+      "dropped": 0,
+      "tokens": 56,
+      "gaps": 1,
+      "latencyMs": 40
+    },
+    "droppedItemIds": []
+  }
+}

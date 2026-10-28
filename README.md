@@ -280,7 +280,21 @@ The catalog is a recommendation, not an allow-list: any dotted lower-case action
 | `brain.clarify_requested` | `brain` | low | alias | `brain.clarification_requested` |
 | `brain.plan_created` | `brain` | low | specific |  |
 | `brain.decision_made` | `brain` | medium | specific |  |
+| `brain.context_attached` | `brain` | low | specific |  |
 | `brain.error` | `brain` | medium | specific |  |
+| `context.requested` | `data_access` | low | specific | |
+| `context.source_fetched` | `data_access` | low | specific | |
+| `context.cache_hit` | `data_access` | low | specific | |
+| `context.cache_miss` | `data_access` | low | specific | |
+| `context.item_dropped` | `data_access` | low | specific | |
+| `context.gap_detected` | `data_access` | low | specific | |
+| `context.need_requested` | `data_access` | low | specific | |
+| `context.need_refused` | `data_access` | medium | specific | |
+| `context.scope_violation` | `data_access` | high | specific | |
+| `context.built` | `data_access` | low | specific | |
+| `context.build_failed` | `data_access` | medium | specific | |
+| `context.packet_viewed` | `data_access` | low | specific | |
+| `context.cache_invalidated` | `data_access` | medium | specific | |
 | `tool.proposed` | `tool` | low | specific |  |
 | `tool.executed` | `tool` | medium | specific |  |
 | `tool.failed` | `tool` | medium | specific |  |
@@ -311,7 +325,7 @@ The catalog is a recommendation, not an allow-list: any dotted lower-case action
 | `audit.integrity_checked` | `data_access` | low | specific | |
 | `analytics.queried` | `data_access` | low | specific | |
 | `analytics.compared` | `data_access` | low | specific | |
-| `data_access.read` | `data_access` | low | generic | `stream.connected`, `stream.disconnected`, `memory.retrieved`, `audit.searched`, `audit.trace_viewed`, `audit.event_viewed`, `audit.integrity_checked`, `analytics.queried`, `analytics.compared` |
+| `data_access.read` | `data_access` | low | generic | `stream.connected`, `stream.disconnected`, `memory.retrieved`, `audit.searched`, `audit.trace_viewed`, `audit.event_viewed`, `audit.integrity_checked`, `analytics.queried`, `analytics.compared`, `context.requested`, `context.source_fetched`, `context.built`, `context.packet_viewed` |
 | `data_access.write` | `data_access` | low | generic | `goal.created`, `goal.updated`, `goal.status_changed`, `goal.clarification_answered` |
 | `data_access.export` | `data_access` | high | specific |  |
 | `data_access.delete` | `data_access` | medium | specific |  |
@@ -348,6 +362,7 @@ The catalog is a recommendation, not an allow-list: any dotted lower-case action
 | `data_access.read` for one trace or one event of the audit trail | `audit.trace_viewed`, `audit.event_viewed` |
 | `data_access.read` for a hash-chain verification | `audit.integrity_checked` |
 | `data_access.read` / `data_access.metrics_*` for metrics queries | `analytics.queried`, `analytics.compared` |
+| `data_access.read` for a context-bridge build or packet view | `context.requested`, `context.source_fetched`, `context.built`, `context.packet_viewed` |
 | `policy.evaluated` with a budget (`enforced: false`) | `budget.evaluated`; `budget.limit_reached` when a limit is hit |
 | `policy.denied` for thread ownership | `thread.access_denied` |
 | `config.changed` for pause / resume / stop / kill | `control.paused`, `control.resumed`, `control.emergency_stopped`, `control.killed` |
@@ -365,6 +380,12 @@ The catalog is a recommendation, not an allow-list: any dotted lower-case action
 ### Timestamps
 
 Every timestamp in this contract is ISO 8601 / RFC 3339, in UTC, with a trailing `Z` and millisecond precision, exactly what `Date.toISOString()` produces (for example `2026-10-25T21:00:00.000Z`). Validation requires the `Z` and rejects offsets such as `+01:00`. Services store and send UTC only; UIs convert to local time for display. For ad metrics, the account's reporting timezone is carried separately in `MetricObservation.timezone`.
+
+### Context bridge (since 0.4.0)
+
+Additive schemas for the context bridge (a separate service that builds the context packet the brain sees before each step). Exports include `stepTypeSchema`, `contextRequestSchema`, `contextPacketSchema`, `contextNeedSchema` (discriminated union with hard limits), `actAsAssertionClaimsSchema` (`exp` at most five minutes after `iat`), and recommended audit `details` schemas that never carry item text. JSON examples live in [`docs/context/`](docs/context/).
+
+Step types: `interpret_message`, `clarify`, `plan_goal`, `propose_budget`, `handle_approval`, `launch_campaign`, `review_performance`, `explain_decision`. Need kinds: `memory_search`, `analytics_compare`, `audit_trace`, `conversation_before`.
 
 ### MetricObservation (version 1)
 

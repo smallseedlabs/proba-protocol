@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/smallseedlabs/proba-protocol/schemas",
   "title": "Proba Protocol Schemas",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "definitions": {
     "CommandType": {
       "$ref": "#/definitions/CommandType",
@@ -926,6 +926,817 @@
             "currency",
             "fetchedAt",
             "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "StepType": {
+      "$ref": "#/definitions/StepType",
+      "definitions": {
+        "StepType": {
+          "type": "string",
+          "enum": [
+            "interpret_message",
+            "clarify",
+            "plan_goal",
+            "propose_budget",
+            "handle_approval",
+            "launch_campaign",
+            "review_performance",
+            "explain_decision"
+          ]
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "ContextRequest": {
+      "$ref": "#/definitions/ContextRequest",
+      "definitions": {
+        "ContextRequest": {
+          "type": "object",
+          "properties": {
+            "traceId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "workspaceId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "userId": {
+              "$ref": "#/definitions/ContextRequest/properties/traceId"
+            },
+            "goalId": {
+              "$ref": "#/definitions/ContextRequest/properties/traceId"
+            },
+            "threadId": {
+              "$ref": "#/definitions/ContextRequest/properties/traceId"
+            },
+            "stepId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "stepType": {
+              "type": "string",
+              "enum": [
+                "interpret_message",
+                "clarify",
+                "plan_goal",
+                "propose_budget",
+                "handle_approval",
+                "launch_campaign",
+                "review_performance",
+                "explain_decision"
+              ]
+            },
+            "needs": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "memory_search"
+                      },
+                      "query": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 500
+                      },
+                      "limit": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 20,
+                        "default": 5
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "query"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "analytics_compare"
+                      },
+                      "campaignIds": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/definitions/ContextRequest/properties/traceId"
+                        },
+                        "minItems": 1,
+                        "maxItems": 10
+                      },
+                      "metric": {
+                        "type": "string",
+                        "enum": [
+                          "impressions",
+                          "clicks",
+                          "spend",
+                          "conversions",
+                          "ctr",
+                          "cpc",
+                          "cpa"
+                        ]
+                      },
+                      "window": {
+                        "type": "string",
+                        "enum": [
+                          "1d",
+                          "7d",
+                          "14d",
+                          "30d",
+                          "90d"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "campaignIds",
+                      "metric",
+                      "window"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "audit_trace"
+                      },
+                      "traceId": {
+                        "$ref": "#/definitions/ContextRequest/properties/traceId"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "traceId"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "conversation_before"
+                      },
+                      "cursor": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "limit": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 50,
+                        "default": 20
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "cursor"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "maxItems": 20
+            },
+            "budgetTokens": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "profile": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "traceId",
+            "workspaceId",
+            "userId",
+            "goalId",
+            "threadId",
+            "stepId",
+            "stepType"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "ContextPacket": {
+      "$ref": "#/definitions/ContextPacket",
+      "definitions": {
+        "ContextPacket": {
+          "type": "object",
+          "properties": {
+            "packetId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "packetHash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "traceId": {
+              "$ref": "#/definitions/ContextPacket/properties/packetId"
+            },
+            "workspaceId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "userId": {
+              "$ref": "#/definitions/ContextPacket/properties/packetId"
+            },
+            "goalId": {
+              "$ref": "#/definitions/ContextPacket/properties/packetId"
+            },
+            "stepId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "configVersion": {
+              "type": "string",
+              "minLength": 1
+            },
+            "templateVersion": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sections": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "policy",
+                      "task",
+                      "conversation",
+                      "memory",
+                      "audit_history",
+                      "analytics",
+                      "tools"
+                    ]
+                  },
+                  "priority": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "tokens": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "itemId": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "sourceRef": {
+                          "type": "object",
+                          "properties": {
+                            "source": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "id": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "required": [
+                            "source",
+                            "id"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "trust": {
+                          "type": "string",
+                          "enum": [
+                            "system",
+                            "user",
+                            "derived",
+                            "external"
+                          ]
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "data": {},
+                        "observedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "score": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "itemId",
+                        "sourceRef",
+                        "trust",
+                        "observedAt"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "kind",
+                  "priority",
+                  "tokens",
+                  "items"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "gaps": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "source": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "suggestedQuestion": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "code",
+                  "source",
+                  "reason"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "manifest": {
+              "type": "object",
+              "properties": {
+                "sources": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "requested": {
+                        "type": "boolean"
+                      },
+                      "returned": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "included": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "dropped": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "droppedReasons": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "default": {}
+                      },
+                      "cacheHit": {
+                        "type": "boolean"
+                      },
+                      "latencyMs": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "tokens": {
+                        "type": "integer",
+                        "minimum": 0
+                      }
+                    },
+                    "required": [
+                      "requested",
+                      "returned",
+                      "included",
+                      "dropped",
+                      "cacheHit",
+                      "latencyMs",
+                      "tokens"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "totals": {
+                  "type": "object",
+                  "properties": {
+                    "returned": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "included": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "dropped": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "tokens": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "gaps": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "latencyMs": {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "returned",
+                    "included",
+                    "dropped",
+                    "tokens",
+                    "gaps",
+                    "latencyMs"
+                  ],
+                  "additionalProperties": false
+                },
+                "droppedItemIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "default": []
+                }
+              },
+              "required": [
+                "sources",
+                "totals"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "packetId",
+            "packetHash",
+            "traceId",
+            "workspaceId",
+            "userId",
+            "goalId",
+            "stepId",
+            "configVersion",
+            "templateVersion",
+            "sections",
+            "gaps",
+            "manifest"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "ContextNeed": {
+      "$ref": "#/definitions/ContextNeed",
+      "definitions": {
+        "ContextNeed": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "memory_search"
+                },
+                "query": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 500
+                },
+                "limit": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 20,
+                  "default": 5
+                }
+              },
+              "required": [
+                "kind",
+                "query"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "analytics_compare"
+                },
+                "campaignIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "minItems": 1,
+                  "maxItems": 10
+                },
+                "metric": {
+                  "type": "string",
+                  "enum": [
+                    "impressions",
+                    "clicks",
+                    "spend",
+                    "conversions",
+                    "ctr",
+                    "cpc",
+                    "cpa"
+                  ]
+                },
+                "window": {
+                  "type": "string",
+                  "enum": [
+                    "1d",
+                    "7d",
+                    "14d",
+                    "30d",
+                    "90d"
+                  ]
+                }
+              },
+              "required": [
+                "kind",
+                "campaignIds",
+                "metric",
+                "window"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "audit_trace"
+                },
+                "traceId": {
+                  "$ref": "#/definitions/ContextNeed/anyOf/1/properties/campaignIds/items"
+                }
+              },
+              "required": [
+                "kind",
+                "traceId"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "conversation_before"
+                },
+                "cursor": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "limit": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 50,
+                  "default": 20
+                }
+              },
+              "required": [
+                "kind",
+                "cursor"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "ActAsAssertionClaims": {
+      "$ref": "#/definitions/ActAsAssertionClaims",
+      "definitions": {
+        "ActAsAssertionClaims": {
+          "type": "object",
+          "properties": {
+            "iss": {
+              "type": "string",
+              "const": "proba-hub"
+            },
+            "aud": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "proba-context",
+                  "proba-audit",
+                  "proba-memory",
+                  "proba-hub"
+                ]
+              },
+              "minItems": 1
+            },
+            "sub": {
+              "type": "string",
+              "minLength": 1
+            },
+            "workspaceId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "goalId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "threadId": {
+              "$ref": "#/definitions/ActAsAssertionClaims/properties/goalId"
+            },
+            "scopes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            },
+            "iat": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "exp": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "jti": {
+              "type": "string",
+              "minLength": 1
+            },
+            "nbf": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "iss",
+            "aud",
+            "sub",
+            "workspaceId",
+            "goalId",
+            "threadId",
+            "scopes",
+            "iat",
+            "exp",
+            "jti"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "ContextAuditDetails": {
+      "$ref": "#/definitions/ContextAuditDetails",
+      "definitions": {
+        "ContextAuditDetails": {
+          "type": "object",
+          "properties": {
+            "packetId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "packetHash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "workspaceId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "userId": {
+              "$ref": "#/definitions/ContextAuditDetails/properties/packetId"
+            },
+            "goalId": {
+              "$ref": "#/definitions/ContextAuditDetails/properties/packetId"
+            },
+            "stepId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "stepType": {
+              "type": "string",
+              "enum": [
+                "interpret_message",
+                "clarify",
+                "plan_goal",
+                "propose_budget",
+                "handle_approval",
+                "launch_campaign",
+                "review_performance",
+                "explain_decision"
+              ]
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "needKind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "gapCode": {
+              "type": "string",
+              "minLength": 1
+            },
+            "configVersion": {
+              "type": "string",
+              "minLength": 1
+            },
+            "counts": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "BrainContextAttachedDetails": {
+      "$ref": "#/definitions/BrainContextAttachedDetails",
+      "definitions": {
+        "BrainContextAttachedDetails": {
+          "type": "object",
+          "properties": {
+            "packetId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "packetHash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "stepId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "stepType": {
+              "type": "string",
+              "enum": [
+                "interpret_message",
+                "clarify",
+                "plan_goal",
+                "propose_budget",
+                "handle_approval",
+                "launch_campaign",
+                "review_performance",
+                "explain_decision"
+              ]
+            },
+            "configVersion": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "packetId",
+            "packetHash",
+            "stepId",
+            "stepType",
+            "configVersion"
           ],
           "additionalProperties": false
         }

@@ -1,0 +1,18 @@
+{
+  "traceId": "550e8400-e29b-41d4-a716-446655440000",
+  "workspaceId": "seedbed",
+  "userId": "660e8400-e29b-41d4-a716-446655440001",
+  "goalId": "770e8400-e29b-41d4-a716-446655440002",
+  "threadId": "880e8400-e29b-41d4-a716-446655440003",
+  "stepId": "step-propose-budget-1",
+  "stepType": "propose_budget",
+  "budgetTokens": 4000,
+  "profile": "default",
+  "needs": [
+    {
+      "kind": "memory_search",
+      "query": "budget",
+      "limit": 5
+    }
+  ]
+}

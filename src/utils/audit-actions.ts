@@ -54,7 +54,23 @@ export const AUDIT_ACTIONS = {
     'brain.clarify_requested',
     'brain.plan_created',
     'brain.decision_made',
+    'brain.context_attached',
     'brain.error',
+  ],
+  context: [
+    'context.requested',
+    'context.source_fetched',
+    'context.cache_hit',
+    'context.cache_miss',
+    'context.item_dropped',
+    'context.gap_detected',
+    'context.need_requested',
+    'context.need_refused',
+    'context.scope_violation',
+    'context.built',
+    'context.build_failed',
+    'context.packet_viewed',
+    'context.cache_invalidated',
   ],
   tool: ['tool.proposed', 'tool.executed', 'tool.failed', 'tool.called', 'tool.completed'],
   policy: ['policy.evaluated', 'policy.allowed', 'policy.denied'],
@@ -172,7 +188,27 @@ export const AUDIT_ACTION_INFO: Record<AuditActionName, AuditActionInfo> = {
   'brain.clarify_requested': info('brain', 'low', 'Alias of brain.clarification_requested.', { status: 'alias', preferred: ['brain.clarification_requested'] }),
   'brain.plan_created': info('brain', 'low', 'The brain produced a plan.'),
   'brain.decision_made': info('brain', 'medium', 'The brain made a decision that moves the goal forward.'),
+  'brain.context_attached': info(
+    'brain',
+    'low',
+    'A context packet was attached to a brain step (details: packetId, packetHash, stepId, stepType, configVersion; never packet text).'
+  ),
   'brain.error': info('brain', 'medium', 'The brain failed or returned unusable output (outcome failure).'),
+
+  // context (context bridge; category data_access — domain is not a category)
+  'context.requested': info('data_access', 'low', 'A context build was requested for a brain step (details: packet ids and step; never item text).'),
+  'context.source_fetched': info('data_access', 'low', 'One context source finished fetching (details: source, counts, latency; never item text).'),
+  'context.cache_hit': info('data_access', 'low', 'A context source was served from cache (details: source; never item text).'),
+  'context.cache_miss': info('data_access', 'low', 'A context source was not in cache and was fetched (details: source).'),
+  'context.item_dropped': info('data_access', 'low', 'An item was dropped from a packet (budget, dedupe or policy; details: reason codes and counts, never item text).'),
+  'context.gap_detected': info('data_access', 'low', 'A typed gap was recorded in a packet (details: gap code and source; never item text).'),
+  'context.need_requested': info('data_access', 'low', 'The brain asked for an extra typed context need (details: need kind and limits).'),
+  'context.need_refused': info('data_access', 'medium', 'A context need was refused by policy or limits (details: need kind and reason; outcome denied).'),
+  'context.scope_violation': info('data_access', 'high', 'An upstream item failed the scope re-filter and was dropped (details: source and counts; raises an alert).'),
+  'context.built': info('data_access', 'low', 'A context packet was built and returned (details: packetId, packetHash, section and token totals; never item text).'),
+  'context.build_failed': info('data_access', 'medium', 'A context build failed (outcome failure; details: errorCode; never item text).'),
+  'context.packet_viewed': info('data_access', 'low', 'A stored context packet manifest was read (admin; details: packetId; never item text).'),
+  'context.cache_invalidated': info('data_access', 'medium', 'Context cache entries were invalidated (details: scope keys; never cached text).'),
 
   // tool
   'tool.proposed': info('tool', 'low', 'A tool call was proposed and has not run (usually waiting for approval; outcome partial). Details: tool name, parameter names.'),
@@ -221,7 +257,7 @@ export const AUDIT_ACTION_INFO: Record<AuditActionName, AuditActionInfo> = {
   'analytics.compared': info('data_access', 'low', 'Two periods of metrics were compared. Details: filter names, result size; never the numbers.'),
 
   // data_access
-  'data_access.read': info('data_access', 'low', 'Generic: data was read. Use stream.connected for SSE, memory.retrieved for memory, audit.* for the audit trail, analytics.* for metrics.', { status: 'generic', preferred: ['stream.connected', 'stream.disconnected', 'memory.retrieved', 'audit.searched', 'audit.trace_viewed', 'audit.event_viewed', 'audit.integrity_checked', 'analytics.queried', 'analytics.compared'] }),
+  'data_access.read': info('data_access', 'low', 'Generic: data was read. Use stream.connected for SSE, memory.retrieved for memory, audit.* for the audit trail, analytics.* for metrics, context.* for the context bridge.', { status: 'generic', preferred: ['stream.connected', 'stream.disconnected', 'memory.retrieved', 'audit.searched', 'audit.trace_viewed', 'audit.event_viewed', 'audit.integrity_checked', 'analytics.queried', 'analytics.compared', 'context.requested', 'context.source_fetched', 'context.built', 'context.packet_viewed'] }),
   'data_access.write': info('data_access', 'low', 'Generic: data was written. Use the goal.* actions for goals.', { status: 'generic', preferred: ['goal.created', 'goal.updated', 'goal.status_changed', 'goal.clarification_answered'] }),
   'data_access.export': info('data_access', 'high', 'Data left the system (export or download).'),
   'data_access.delete': info('data_access', 'medium', 'Data was deleted.'),
