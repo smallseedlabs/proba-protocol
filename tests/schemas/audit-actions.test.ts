@@ -55,6 +55,14 @@ const READ_ACTIONS = [
   'analytics.queried', 'analytics.compared',
 ];
 
+/** Added in 0.4.0: context bridge. */
+const CONTEXT_ACTIONS = [
+  'context.requested', 'context.source_fetched', 'context.cache_hit', 'context.cache_miss',
+  'context.item_dropped', 'context.gap_detected', 'context.need_requested', 'context.need_refused',
+  'context.scope_violation', 'context.built', 'context.build_failed', 'context.packet_viewed',
+  'context.cache_invalidated',
+];
+
 const ALL = Object.values(AUDIT_ACTIONS).flat() as AuditActionName[];
 const SHAPE = /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/;
 
@@ -114,6 +122,25 @@ describe('AUDIT_ACTIONS catalog', () => {
 
   it('should offer the read actions as replacements for the generic data_access.read', () => {
     for (const action of READ_ACTIONS) expect(AUDIT_ACTION_INFO['data_access.read'].preferred).toContain(action);
+  });
+
+  it('should contain the context bridge actions: specific, category data_access', () => {
+    expect([...AUDIT_ACTIONS.context]).toEqual(CONTEXT_ACTIONS);
+    for (const action of CONTEXT_ACTIONS) {
+      const entry = AUDIT_ACTION_INFO[action as AuditActionName];
+      expect(entry.status).toBe('specific');
+      expect(entry.category).toBe('data_access');
+      expect(entry.description.length).toBeGreaterThan(10);
+    }
+    expect(AUDIT_ACTION_INFO['context.scope_violation'].riskLevel).toBe('high');
+    expect(AUDIT_ACTION_INFO['brain.context_attached'].category).toBe('brain');
+    expect(AUDIT_ACTION_INFO['brain.context_attached'].status).toBe('specific');
+  });
+
+  it('should offer key context actions among data_access.read preferred replacements', () => {
+    for (const action of ['context.requested', 'context.source_fetched', 'context.built', 'context.packet_viewed'] as const) {
+      expect(AUDIT_ACTION_INFO['data_access.read'].preferred).toContain(action);
+    }
   });
 
   it('should validate every action (with its recommended category) as an AuditEvent', () => {
