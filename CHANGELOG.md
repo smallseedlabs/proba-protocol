@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-10-28
+
+### Added
+
+- Context bridge contract (additive; v0.3.x events and exports stay valid):
+  - Action domain `context.*`: `requested`, `source_fetched`, `cache_hit`, `cache_miss`, `item_dropped`, `gap_detected`, `need_requested`, `need_refused`, `scope_violation`, `built`, `build_failed`, `packet_viewed`, `cache_invalidated` (category `data_access`; `context.scope_violation` is high risk)
+  - `brain.context_attached` (category `brain`): packetId, packetHash, stepId, stepType, configVersion in `details`
+  - Zod schemas and types: `StepType`, `ContextRequest`, `ContextPacket`, `Section` / `Item` / `Gap` / `Manifest`, typed `ContextNeed` union (`memory_search`, `analytics_compare`, `audit_trace`, `conversation_before` with hard limits), `ActAsAssertionClaims` (EdDSA claim shape; `exp` at most 5 minutes after `iat`), `contextAuditDetailsSchema`, `brainContextAttachedDetailsSchema`
+  - Known gap codes in `KNOWN_GAP_CODES`; JSON examples under `docs/context/`; JSON Schema bundle regenerated
+  - `data_access.read` preferred list also points at key `context.*` read/build actions
+
 ## [0.3.3] - 2026-10-26
 
 ### Added

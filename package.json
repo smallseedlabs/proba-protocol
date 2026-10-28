@@ -1,6 +1,6 @@
 {
   "name": "@smallseedlabs/proba-protocol",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "description": "Shared protocol library for Proba - AI-native platform for testing products with ads",
   "type": "module",
   "main": "./dist/index.js",
@@ -19,6 +19,7 @@
   "files": [
     "dist",
     "schemas",
+    "docs",
     "README.md",
     "LICENSE",
     "CHANGELOG.md"

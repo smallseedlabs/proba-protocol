@@ -1,0 +1,12 @@
+{
+  "iss": "proba-hub",
+  "aud": ["proba-context", "proba-audit", "proba-memory", "proba-hub"],
+  "sub": "660e8400-e29b-41d4-a716-446655440001",
+  "workspaceId": "seedbed",
+  "goalId": "770e8400-e29b-41d4-a716-446655440002",
+  "threadId": "880e8400-e29b-41d4-a716-446655440003",
+  "scopes": ["context:build"],
+  "iat": 1700000000,
+  "exp": 1700000300,
+  "jti": "assert-jti-001"
+}
