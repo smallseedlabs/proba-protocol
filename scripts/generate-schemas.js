@@ -25,12 +25,21 @@ async function generateSchemas() {
     '../dist/schemas/audit.js'
   );
   const { metricObservationSchema } = await import('../dist/schemas/metrics.js');
+  const {
+    stepTypeSchema,
+    contextRequestSchema,
+    contextPacketSchema,
+    contextNeedSchema,
+    actAsAssertionClaimsSchema,
+    contextAuditDetailsSchema,
+    brainContextAttachedDetailsSchema,
+  } = await import('../dist/schemas/context.js');
 
   const schemas = {
     $schema: 'http://json-schema.org/draft-07/schema#',
     $id: 'https://github.com/smallseedlabs/proba-protocol/schemas',
     title: 'Proba Protocol Schemas',
-    version: '0.1.0',
+    version: '0.4.0',
     definitions: {
       CommandType: zodToJsonSchema(commandTypeSchema, 'CommandType'),
       CommandEnvelope: zodToJsonSchema(commandEnvelopeSchema, 'CommandEnvelope'),
@@ -41,6 +50,16 @@ async function generateSchemas() {
       AuditEvent: zodToJsonSchema(auditEventSchema, 'AuditEvent'),
       StoredAuditEvent: zodToJsonSchema(storedAuditEventSchema, 'StoredAuditEvent'),
       MetricObservation: zodToJsonSchema(metricObservationSchema, 'MetricObservation'),
+      StepType: zodToJsonSchema(stepTypeSchema, 'StepType'),
+      ContextRequest: zodToJsonSchema(contextRequestSchema, 'ContextRequest'),
+      ContextPacket: zodToJsonSchema(contextPacketSchema, 'ContextPacket'),
+      ContextNeed: zodToJsonSchema(contextNeedSchema, 'ContextNeed'),
+      ActAsAssertionClaims: zodToJsonSchema(actAsAssertionClaimsSchema, 'ActAsAssertionClaims'),
+      ContextAuditDetails: zodToJsonSchema(contextAuditDetailsSchema, 'ContextAuditDetails'),
+      BrainContextAttachedDetails: zodToJsonSchema(
+        brainContextAttachedDetailsSchema,
+        'BrainContextAttachedDetails'
+      ),
     },
   };
 
