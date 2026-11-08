@@ -1,4 +1,4 @@
-# Research review schemas (protocol 0.5.0)
+# Research review schemas (protocol 0.6.0; research fields since 0.5.0)
 
 Additive contract for operator-entered landing URLs, versioned sourced research, and an explicit research-review ask. Compatible with gateway `docs/RESEARCH_REVIEW_CONTRACT.md` and types at `smallseedlabs/proba-llm-gateway@86630d02cbbeb6b6459676b547c41064d6df3321` (gateway PR4; not merged at time of writing).
 
