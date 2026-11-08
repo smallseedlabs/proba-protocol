@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Publish workflow listens only to version tag `push` (`v*.*.*`). It previously also ran on `release: published`, so creating a GitHub Release for a new tag started two `npm publish` jobs; the second always 409'd (`Cannot publish over existing version`). Does not change package 0.6.0 or republish.
+
 ## [0.6.0] - 2026-11-08
 
 ### Changed
