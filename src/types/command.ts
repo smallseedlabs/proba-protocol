@@ -3,6 +3,8 @@
  * Commands are sent from client to server.
  */
 
+import type { ResearchAcceptanceBinding, UserSuppliedInput } from './research.js';
+
 export type CommandType =
   | 'send_message'
   | 'answer_ask'
@@ -38,6 +40,17 @@ export interface AnswerAskPayload {
   choice: AskChoice;
   values?: Record<string, unknown>;
   edit?: string;
+  /**
+   * Required when answering askType `research_review`. Must equal the ask's
+   * artifactId, version, and inputRevision. A mismatch is not acceptance.
+   */
+  researchAcceptance?: ResearchAcceptanceBinding;
+  /**
+   * Only with `choice: 'edit'` on a research review: the replacement
+   * operator-entered URL. Edit invalidates the current artifact; Hub must
+   * gather and accept the new input revision. Never a default URL.
+   */
+  userSuppliedInput?: UserSuppliedInput;
 }
 
 export interface CreateGoalPayload {
@@ -49,6 +62,12 @@ export interface CreateGoalPayload {
     total?: number;
     currency: string;
   };
+  /**
+   * Operator-entered landing URL for this campaign goal. Optional so existing
+   * create_goal clients stay valid; research.gather / ads.create_campaign fail
+   * closed until Hub sends it. Never defaulted or taken from model text.
+   */
+  userSuppliedInput?: UserSuppliedInput;
 }
 
 export interface ApprovePlanPayload {

@@ -34,12 +34,19 @@ async function generateSchemas() {
     contextAuditDetailsSchema,
     brainContextAttachedDetailsSchema,
   } = await import('../dist/schemas/context.js');
+  const {
+    userSuppliedInputSchema,
+    researchArtifactSchema,
+    researchReviewAskSchema,
+    researchAcceptanceBindingSchema,
+    landingPageUrlSchema,
+  } = await import('../dist/schemas/research.js');
 
   const schemas = {
     $schema: 'http://json-schema.org/draft-07/schema#',
     $id: 'https://github.com/smallseedlabs/proba-protocol/schemas',
     title: 'Proba Protocol Schemas',
-    version: '0.4.0',
+    version: '0.5.0',
     definitions: {
       CommandType: zodToJsonSchema(commandTypeSchema, 'CommandType'),
       CommandEnvelope: zodToJsonSchema(commandEnvelopeSchema, 'CommandEnvelope'),
@@ -59,6 +66,14 @@ async function generateSchemas() {
       BrainContextAttachedDetails: zodToJsonSchema(
         brainContextAttachedDetailsSchema,
         'BrainContextAttachedDetails'
+      ),
+      LandingPageUrl: zodToJsonSchema(landingPageUrlSchema, 'LandingPageUrl'),
+      UserSuppliedInput: zodToJsonSchema(userSuppliedInputSchema, 'UserSuppliedInput'),
+      ResearchArtifact: zodToJsonSchema(researchArtifactSchema, 'ResearchArtifact'),
+      ResearchReviewAsk: zodToJsonSchema(researchReviewAskSchema, 'ResearchReviewAsk'),
+      ResearchAcceptanceBinding: zodToJsonSchema(
+        researchAcceptanceBindingSchema,
+        'ResearchAcceptanceBinding'
       ),
     },
   };

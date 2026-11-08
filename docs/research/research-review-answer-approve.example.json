@@ -1,0 +1,16 @@
+{
+  "kind": "command",
+  "clientMsgId": "c2e1f1a1-2222-4d22-a222-222222222222",
+  "type": "answer_ask",
+  "threadId": "ee0e8400-e29b-41d4-a716-446655440014",
+  "payload": {
+    "askId": "bb0e8400-e29b-41d4-a716-446655440011",
+    "choice": "approve",
+    "researchAcceptance": {
+      "artifactId": "aa0e8400-e29b-41d4-a716-446655440010",
+      "version": 1,
+      "inputRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  "sentAt": "2026-11-08T17:01:00.000Z"
+}

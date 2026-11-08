@@ -1,0 +1,44 @@
+{
+  "artifactId": "aa0e8400-e29b-41d4-a716-446655440010",
+  "version": 1,
+  "workspaceId": "seedbed",
+  "userId": "cc0e8400-e29b-41d4-a716-446655440012",
+  "goalId": "dd0e8400-e29b-41d4-a716-446655440013",
+  "threadId": "ee0e8400-e29b-41d4-a716-446655440014",
+  "landingPageUrl": "https://operator-entered.example/path",
+  "inputRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "status": "awaiting_acceptance",
+  "providerName": "http-url",
+  "sources": [
+    {
+      "sourceId": "page-1",
+      "kind": "http_url",
+      "url": "https://operator-entered.example/path",
+      "fetchedAt": "2026-11-08T17:00:00.000Z",
+      "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "excerpt": "The page describes an example offer."
+    }
+  ],
+  "findings": [
+    {
+      "id": "f1",
+      "text": "The page describes an example offer.",
+      "sourceIds": ["page-1"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "a1",
+      "text": "Operator supplied https://operator-entered.example/path",
+      "basis": "user_input"
+    }
+  ],
+  "unknowns": [
+    {
+      "id": "u1",
+      "text": "Audience was not verified beyond the fetched excerpt."
+    }
+  ],
+  "createdAt": "2026-11-08T17:00:00.000Z",
+  "updatedAt": "2026-11-08T17:00:00.000Z"
+}

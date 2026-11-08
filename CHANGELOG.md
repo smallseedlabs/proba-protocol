@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-11-08
+
+### Added
+
+- Research review contract (additive; v0.4.x commands, clarify/plan/action asks, and exports stay valid):
+  - Optional `userSuppliedInput.landingPageUrl` on `create_goal` (campaign-goal command). Strict object: URL only. Omitted payloads still validate. Syntactic http(s), no credentials, max 2048, original string preserved. No default, hardcoded, or auto-prefilled destination
+  - Optional `researchAcceptance` on `answer_ask` (artifactId + version + inputRevision). Optional `userSuppliedInput` on `answer_ask` only with `choice=edit`
+  - `askType: "research_review"` with required `payload.research` (`verb: "research.accept"`, findings that must cite `sources`, assumptions, unknowns). Clarify / `plan_approval` / `action_approval` must omit `research`. `costEffect` forbidden; question `default` forbidden; `onExpire` if present must be `deny`
+  - Zod schemas/types: `UserSuppliedInput`, `ResearchArtifact`, `ResearchSource` / `ResearchReviewSource`, `ResearchFinding`, `ResearchAssumption`, `ResearchUnknown`, `ResearchReviewAsk`, `ResearchAcceptanceBinding`
+  - Helpers: `parseLandingPageUrl`, `researchFindingsAreSourced`, `canAcceptResearchArtifact`, `researchAcceptanceMatches`, `evaluateResearchReviewAnswer` (`grantsSpend` always `false`)
+  - Hub builder `buildResearchReviewAskEvent` (not a brain mapper). `mapToolCallToEvent` for `research.accept` / `research.gather` emits a system message instead of an approval card
+  - JSON examples under `docs/research/`; JSON Schema bundle definitions regenerated
+- Field names match gateway research types at `proba-llm-gateway@86630d02cbbeb6b6459676b547c41064d6df3321`. Context packets are not research. workspaceId/userId are never taken from model or `userSuppliedInput` fields. Research acceptance does not bypass spend policy
+- CI runs on every pull request (not only PRs targeting `main`) plus `push` to `cursor/**`; gitleaks MIT CLI job; JSON Schema consumer fixture under `tests/fixtures/web-consumer-schema-contract.json`
+
 ## [0.4.0] - 2026-10-28
 
 ### Added

@@ -1,0 +1,70 @@
+{
+  "description": "Stable Web/Hub JSON Schema consumer contract. Generator wrappers may change; these definition names and required wire fields must remain.",
+  "definitions": {
+    "CommandEnvelope": {
+      "required": ["kind", "clientMsgId", "type", "sentAt"],
+      "properties": ["kind", "clientMsgId", "type", "threadId", "payload", "sentAt"]
+    },
+    "EventEnvelope": {
+      "required": ["kind", "seq", "type", "at"],
+      "properties": ["kind", "seq", "type", "threadId", "payload", "at"]
+    },
+    "AuditEvent": {
+      "required": [
+        "version",
+        "eventId",
+        "traceId",
+        "spanId",
+        "workspaceId",
+        "actor",
+        "service",
+        "action",
+        "category",
+        "outcome",
+        "occurredAt",
+        "details"
+      ]
+    },
+    "UserSuppliedInput": {
+      "required": ["landingPageUrl"],
+      "propertyNames": ["landingPageUrl"]
+    },
+    "ResearchReviewAsk": {
+      "required": [
+        "verb",
+        "artifactId",
+        "version",
+        "inputRevision",
+        "landingPageUrl",
+        "status",
+        "findings",
+        "assumptions",
+        "unknowns",
+        "sources"
+      ]
+    },
+    "ResearchAcceptanceBinding": {
+      "required": ["artifactId", "version", "inputRevision"]
+    },
+    "ResearchArtifact": {
+      "required": [
+        "artifactId",
+        "version",
+        "workspaceId",
+        "userId",
+        "goalId",
+        "threadId",
+        "landingPageUrl",
+        "inputRevision",
+        "status",
+        "providerName",
+        "sources",
+        "findings",
+        "assumptions",
+        "unknowns",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  }
+}

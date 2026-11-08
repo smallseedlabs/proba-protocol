@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/smallseedlabs/proba-protocol/schemas",
   "title": "Proba Protocol Schemas",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "definitions": {
     "CommandType": {
       "$ref": "#/definitions/CommandType",
@@ -1737,6 +1737,497 @@
             "stepId",
             "stepType",
             "configVersion"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "LandingPageUrl": {
+      "$ref": "#/definitions/LandingPageUrl",
+      "definitions": {
+        "LandingPageUrl": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "UserSuppliedInput": {
+      "$ref": "#/definitions/UserSuppliedInput",
+      "definitions": {
+        "UserSuppliedInput": {
+          "type": "object",
+          "properties": {
+            "landingPageUrl": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            }
+          },
+          "required": [
+            "landingPageUrl"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "ResearchArtifact": {
+      "$ref": "#/definitions/ResearchArtifact",
+      "definitions": {
+        "ResearchArtifact": {
+          "type": "object",
+          "properties": {
+            "artifactId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "version": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "workspaceId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "userId": {
+              "$ref": "#/definitions/ResearchArtifact/properties/artifactId"
+            },
+            "goalId": {
+              "$ref": "#/definitions/ResearchArtifact/properties/artifactId"
+            },
+            "threadId": {
+              "$ref": "#/definitions/ResearchArtifact/properties/artifactId"
+            },
+            "landingPageUrl": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            "inputRevision": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "awaiting_acceptance",
+                "accepted",
+                "invalidated",
+                "failed"
+              ]
+            },
+            "providerName": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "sources": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "sourceId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "kind": {
+                    "type": "string",
+                    "const": "http_url"
+                  },
+                  "url": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2048
+                  },
+                  "fetchedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "contentType": {
+                    "type": "string",
+                    "maxLength": 256
+                  },
+                  "sha256": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "excerpt": {
+                    "type": "string",
+                    "maxLength": 4096
+                  }
+                },
+                "required": [
+                  "sourceId",
+                  "kind",
+                  "url",
+                  "fetchedAt",
+                  "sha256"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 32
+            },
+            "findings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "sourceIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "minItems": 1,
+                    "maxItems": 16
+                  }
+                },
+                "required": [
+                  "id",
+                  "text",
+                  "sourceIds"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 32
+            },
+            "assumptions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "basis": {
+                    "type": "string",
+                    "enum": [
+                      "user_input",
+                      "page_text",
+                      "unverified"
+                    ]
+                  },
+                  "sourceIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "maxItems": 16
+                  }
+                },
+                "required": [
+                  "id",
+                  "text",
+                  "basis"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 32
+            },
+            "unknowns": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "id",
+                  "text"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 32
+            },
+            "errorCode": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "errorMessage": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "acceptedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "acceptedByAskId": {
+              "$ref": "#/definitions/ResearchArtifact/properties/artifactId"
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updatedAt": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "artifactId",
+            "version",
+            "workspaceId",
+            "userId",
+            "goalId",
+            "threadId",
+            "landingPageUrl",
+            "inputRevision",
+            "status",
+            "providerName",
+            "sources",
+            "findings",
+            "assumptions",
+            "unknowns",
+            "createdAt",
+            "updatedAt"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "ResearchReviewAsk": {
+      "$ref": "#/definitions/ResearchReviewAsk",
+      "definitions": {
+        "ResearchReviewAsk": {
+          "type": "object",
+          "properties": {
+            "verb": {
+              "type": "string",
+              "const": "research.accept"
+            },
+            "artifactId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "version": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "inputRevision": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "landingPageUrl": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            "status": {
+              "type": "string",
+              "const": "awaiting_acceptance"
+            },
+            "findings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "sourceIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "minItems": 1,
+                    "maxItems": 16
+                  }
+                },
+                "required": [
+                  "id",
+                  "text",
+                  "sourceIds"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 32
+            },
+            "assumptions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "basis": {
+                    "type": "string",
+                    "enum": [
+                      "user_input",
+                      "page_text",
+                      "unverified"
+                    ]
+                  },
+                  "sourceIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "maxItems": 16
+                  }
+                },
+                "required": [
+                  "id",
+                  "text",
+                  "basis"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 32
+            },
+            "unknowns": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "id",
+                  "text"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 32
+            },
+            "sources": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "sourceId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "kind": {
+                    "type": "string",
+                    "const": "http_url"
+                  },
+                  "url": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2048
+                  },
+                  "sha256": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  }
+                },
+                "required": [
+                  "sourceId",
+                  "kind",
+                  "url",
+                  "sha256"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 32
+            }
+          },
+          "required": [
+            "verb",
+            "artifactId",
+            "version",
+            "inputRevision",
+            "landingPageUrl",
+            "status",
+            "findings",
+            "assumptions",
+            "unknowns",
+            "sources"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "ResearchAcceptanceBinding": {
+      "$ref": "#/definitions/ResearchAcceptanceBinding",
+      "definitions": {
+        "ResearchAcceptanceBinding": {
+          "type": "object",
+          "properties": {
+            "artifactId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "version": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "inputRevision": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          "required": [
+            "artifactId",
+            "version",
+            "inputRevision"
           ],
           "additionalProperties": false
         }

@@ -1,10 +1,19 @@
 name: CI
 
+# Default branch is main (v0.4.0 already landed via #21).
+# pull_request is unfiltered so stacked PRs (research #22, Zod 4 #23) actually run.
+# push also covers cursor/** so head-branch pushes are not skipped.
 on:
   push:
-    branches: [main]
+    branches: [main, 'cursor/**']
   pull_request:
-    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lint:
@@ -74,4 +83,21 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run build
-      - run: npm test -- tests/examples/
+      - run: npm test -- tests/examples/ tests/schemas/json-schema-consumer.test.ts
+
+  gitleaks:
+    name: Gitleaks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Install gitleaks
+        env:
+          GITLEAKS_VERSION: '8.24.2'
+        run: |
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            | tar -xz -C /usr/local/bin gitleaks
+          gitleaks version
+      - name: Scan for secrets
+        run: gitleaks detect --source . --config .gitleaks.toml --verbose --redact --exit-code 1

@@ -1,0 +1,72 @@
+{
+  "kind": "event",
+  "seq": 4,
+  "type": "ask",
+  "threadId": "ee0e8400-e29b-41d4-a716-446655440014",
+  "payload": {
+    "askId": "bb0e8400-e29b-41d4-a716-446655440011",
+    "askType": "research_review",
+    "title": "Review sourced research",
+    "description": "Accept findings, assumptions, and unknowns for this landing-URL revision. Edit invalidates acceptance. This is not campaign spend approval.",
+    "blocking": true,
+    "risk": "high",
+    "onExpire": "deny",
+    "questions": [
+      {
+        "id": "research-accept",
+        "type": "confirm",
+        "label": "Accept this sourced research for the current operator-entered landing URL?",
+        "required": true
+      }
+    ],
+    "research": {
+      "verb": "research.accept",
+      "artifactId": "aa0e8400-e29b-41d4-a716-446655440010",
+      "version": 1,
+      "inputRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "landingPageUrl": "https://operator-entered.example/path",
+      "status": "awaiting_acceptance",
+      "findings": [
+        {
+          "id": "f1",
+          "text": "The page describes an example offer.",
+          "sourceIds": ["page-1"]
+        }
+      ],
+      "assumptions": [
+        {
+          "id": "a1",
+          "text": "Operator supplied https://operator-entered.example/path",
+          "basis": "user_input"
+        }
+      ],
+      "unknowns": [
+        {
+          "id": "u1",
+          "text": "Audience was not verified beyond the fetched excerpt."
+        }
+      ],
+      "sources": [
+        {
+          "sourceId": "page-1",
+          "kind": "http_url",
+          "url": "https://operator-entered.example/path",
+          "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+        }
+      ]
+    }
+  },
+  "ui": {
+    "component": "confirm",
+    "version": "1.0.0",
+    "props": {
+      "title": "Review sourced research",
+      "message": "Accept findings, assumptions, and unknowns for this landing-URL revision. Edit invalidates acceptance. This is not campaign spend approval.",
+      "confirmLabel": "Accept research",
+      "cancelLabel": "Reject",
+      "risk": "high"
+    }
+  },
+  "fallbackText": "Research review (research.accept) for https://operator-entered.example/path\nartifact aa0e8400-e29b-41d4-a716-446655440010 v1 revision aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nAccepting this review does not grant spend or bypass budget policy.\nContext packets are not research.",
+  "at": "2026-11-08T17:00:02.000Z"
+}

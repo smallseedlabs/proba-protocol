@@ -5,3 +5,4 @@
 export * from './command.js';
 export * from './event.js';
 export * from './audit.js';
+export * from './research.js';
