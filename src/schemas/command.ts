@@ -3,6 +3,7 @@
  */
 
 import { z } from 'zod';
+import { researchAcceptanceBindingSchema, userSuppliedInputSchema } from './research.js';
 
 export const commandTypeSchema = z.enum([
   'send_message',
@@ -28,12 +29,25 @@ export const sendMessagePayloadSchema = z.object({
     .optional(),
 });
 
-export const answerAskPayloadSchema = z.object({
-  askId: z.string().uuid(),
-  choice: z.enum(['approve', 'reject', 'edit']),
-  values: z.record(z.unknown()).optional(),
-  edit: z.string().optional(),
-});
+export const answerAskPayloadSchema = z
+  .object({
+    askId: z.string().uuid(),
+    choice: z.enum(['approve', 'reject', 'edit']),
+    values: z.record(z.unknown()).optional(),
+    edit: z.string().optional(),
+    researchAcceptance: researchAcceptanceBindingSchema.optional(),
+    userSuppliedInput: userSuppliedInputSchema.optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.userSuppliedInput !== undefined && data.choice !== 'edit') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          'userSuppliedInput on answer_ask is only allowed with choice=edit; approve/reject must not change the landing URL',
+        path: ['userSuppliedInput'],
+      });
+    }
+  });
 
 export const createGoalPayloadSchema = z.object({
   title: z.string().min(1).max(200),
@@ -46,6 +60,7 @@ export const createGoalPayloadSchema = z.object({
       currency: z.string().length(3),
     })
     .optional(),
+  userSuppliedInput: userSuppliedInputSchema.optional(),
 });
 
 export const approvePlanPayloadSchema = z.object({

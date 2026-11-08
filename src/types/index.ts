@@ -10,3 +10,4 @@ export * from './brain.js';
 export * from './audit.js';
 export * from './metrics.js';
 export * from './context.js';
+export * from './research.js';

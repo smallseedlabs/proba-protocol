@@ -179,10 +179,35 @@ export function mapPlanToEvent(
 /**
  * Maps a brain tool call to an ask event with approval_card UI.
  */
+/**
+ * Gateway `research.accept` is Hub-mediated and is not offered to the model.
+ * Mapping a model tool_call of that name to an approval_card would look like
+ * spend approval and would trust model fields. Hub must use
+ * `buildResearchReviewAskEvent` from the gateway snapshot instead.
+ */
+export const HUB_MEDIATED_RESEARCH_VERBS = ['research.accept', 'research.gather'] as const;
+
+export function isHubMediatedResearchVerb(tool: string): boolean {
+  return (HUB_MEDIATED_RESEARCH_VERBS as readonly string[]).includes(tool);
+}
+
 export function mapToolCallToEvent(
   toolCall: BrainToolCall,
   context: MappingContext
-): EventEnvelope<AskPayload> {
+): EventEnvelope<AskPayload | MessagePayload> {
+  if (isHubMediatedResearchVerb(toolCall.tool)) {
+    const text =
+      'Research review is Hub-mediated. Model tool text is not user-supplied input or research acceptance. Context packets are not research. There is no default landing URL.';
+    return buildMessageEvent(
+      { text, source: 'system' },
+      {
+        seq: context.seq,
+        threadId: context.threadId,
+        fallbackText: text,
+      }
+    );
+  }
+
   const currentValue = JSON.stringify(toolCall.parameters, null, 2);
 
   const payload: AskPayload = {

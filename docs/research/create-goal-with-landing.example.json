@@ -1,0 +1,20 @@
+{
+  "kind": "command",
+  "clientMsgId": "c1e1f1a1-1111-4d11-a111-111111111111",
+  "type": "create_goal",
+  "threadId": "f1e1f1a1-1111-4d11-a111-111111111111",
+  "payload": {
+    "title": "Launch Q4 Product Campaign",
+    "description": "Promote our new product feature to existing users",
+    "constraints": ["family-friendly", "no-clickbait"],
+    "budget": {
+      "daily": 100,
+      "total": 3000,
+      "currency": "USD"
+    },
+    "userSuppliedInput": {
+      "landingPageUrl": "https://operator-entered.example/path"
+    }
+  },
+  "sentAt": "2026-11-08T17:00:00.000Z"
+}

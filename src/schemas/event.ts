@@ -4,6 +4,7 @@
 
 import { z } from 'zod';
 import { serverUISchema } from './ui.js';
+import { researchReviewAskSchema } from './research.js';
 
 export const eventTypeSchema = z.enum([
   'message',
@@ -51,7 +52,7 @@ export const questionSchema = z.object({
 export const askPayloadSchema = z
   .object({
     askId: z.string().uuid(),
-    askType: z.enum(['clarify', 'action_approval', 'plan_approval']),
+    askType: z.enum(['clarify', 'action_approval', 'plan_approval', 'research_review']),
     title: z.string().min(1),
     description: z.string().optional(),
     blocking: z.boolean(),
@@ -67,9 +68,49 @@ export const askPayloadSchema = z
     expiresAt: z.string().datetime().optional(),
     onExpire: z.enum(['deny', 'default', 'escalate']).optional(),
     questions: z.array(questionSchema).min(1).max(3),
+    research: researchReviewAskSchema.optional(),
   })
-  .refine((data) => data.questions.length <= 3, {
-    message: 'Maximum 3 questions allowed per ask',
+  .superRefine((data, ctx) => {
+    if (data.askType === 'research_review') {
+      if (!data.research) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'askType research_review requires payload.research bound to the current artifact revision',
+          path: ['research'],
+        });
+      }
+      if (data.costEffect !== undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            'research_review is not spend approval; omit costEffect so this is not rendered as a budget card',
+          path: ['costEffect'],
+        });
+      }
+      if (data.onExpire !== undefined && data.onExpire !== 'deny') {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'research_review onExpire must be deny; absence of an answer is not acceptance',
+          path: ['onExpire'],
+        });
+      }
+      for (let i = 0; i < data.questions.length; i += 1) {
+        if (data.questions[i].default !== undefined) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message:
+              'research_review questions must not set default; never auto-prefill the landing URL',
+            path: ['questions', i, 'default'],
+          });
+        }
+      }
+    } else if (data.research !== undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'payload.research is only valid on askType research_review',
+        path: ['research'],
+      });
+    }
   });
 
 export const askResolvedPayloadSchema = z.object({

@@ -484,7 +484,7 @@ Poll for events after a given sequence number.
 |------|-------------|---------|
 | `send_message` | Send a text message with optional attachments | `SendMessagePayload` |
 | `answer_ask` | Answer a question (approve/reject/edit) | `AnswerAskPayload` |
-| `create_goal` | Create a new campaign goal | `CreateGoalPayload` |
+| `create_goal` | Create a new campaign goal | `CreateGoalPayload` (optional `userSuppliedInput.landingPageUrl` since 0.5.0; omitted stays valid; never defaulted) |
 | `approve_plan` | Approve or reject a plan | `ApprovePlanPayload` |
 | `control` | Control execution (pause/resume/kill) | `ControlPayload` |
 | `explain` | Request explanation for a decision | `ExplainPayload` |
@@ -495,7 +495,7 @@ Poll for events after a given sequence number.
 | Type | Description | Payload |
 |------|-------------|---------|
 | `message` | Text message from brain or system | `MessagePayload` |
-| `ask` | Question requiring user input | `AskPayload` |
+| `ask` | Question requiring user input | `AskPayload` (`askType`: `clarify`, `plan_approval`, `action_approval`, and since 0.5.0 `research_review`) |
 | `ask_resolved` | Resolution of a previous ask | `AskResolvedPayload` |
 | `status` | Current system status | `StatusPayload` |
 | `alert` | User alert or notification | `AlertPayload` |
@@ -537,6 +537,8 @@ See [`examples/happy-path-conversation.json`](./examples/happy-path-conversation
 4. Action approval with edit (+20% → +10%)
 5. Decision with evidence
 
+Research review (0.5.0, additive): operator-entered `userSuppliedInput.landingPageUrl` on `create_goal`, versioned sourced findings/sources/assumptions/unknowns, and explicit `askType: "research_review"`. Acceptance is bound to `artifactId` + `version` + `inputRevision`; `edit` invalidates. Context packets are not research. Accepting research does not grant spend. Wire shape for proba-web (operator UI, not portal) and Hub: [`docs/research/README.md`](./docs/research/README.md). Happy-path examples in that folder do not replace the conversation fixture above.
+
 ## Development
 
 ```bash
@@ -574,7 +576,7 @@ This project follows [Semantic Versioning](https://semver.org/):
 - **Minor**: New features, backward-compatible
 - **Patch**: Bug fixes, backward-compatible
 
-Current version: **0.1.0** (initial release)
+Current version: **0.5.0**
 
 ## License
 
@@ -586,6 +588,7 @@ See [LICENSE](./LICENSE) for full license text.
 
 **Related Projects:**
 - [proba-hub](https://github.com/smallseedlabs/proba-hub) - Interaction Hub (protocol service)
-- [proba-web](https://github.com/smallseedlabs/proba-web) - Client UI
+- [proba-web](https://github.com/smallseedlabs/proba-web) - Operator UI (not portal)
+- [proba-llm-gateway](https://github.com/smallseedlabs/proba-llm-gateway) - Hub → brain/tools HTTP (research artifact + `userSuppliedInput` live there)
 
 For questions, please open an issue on GitHub.

@@ -4,6 +4,7 @@
  */
 
 import type { ServerUI } from './ui.js';
+import type { ResearchReviewAsk } from './research.js';
 
 export type EventType =
   | 'message'
@@ -32,7 +33,7 @@ export interface MessagePayload {
   replyTo?: string;
 }
 
-export type AskType = 'clarify' | 'action_approval' | 'plan_approval';
+export type AskType = 'clarify' | 'action_approval' | 'plan_approval' | 'research_review';
 export type RiskLevel = 'low' | 'medium' | 'high';
 export type OnExpire = 'deny' | 'default' | 'escalate';
 export type QuestionType = 'choice' | 'number' | 'text' | 'confirm';
@@ -77,6 +78,11 @@ export interface AskPayload {
   expiresAt?: string;
   onExpire?: OnExpire;
   questions: Question[];
+  /**
+   * Required iff askType is `research_review`. Existing clarify / plan_approval
+   * / action_approval asks omit this field.
+   */
+  research?: ResearchReviewAsk;
 }
 
 export interface AskResolvedPayload {
