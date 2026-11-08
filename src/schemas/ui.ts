@@ -3,6 +3,7 @@
  */
 
 import { z } from 'zod';
+import { utcDateTimeSchema } from './iso.js';
 
 export const componentTypeSchema = z.enum([
   'text',
@@ -26,28 +27,17 @@ export const componentTypeSchema = z.enum([
 
 export const actionStyleSchema = z.enum(['primary', 'default', 'danger']);
 
-export const uiActionSchema: z.ZodLazy<z.ZodObject<{
-  id: z.ZodString;
-  label: z.ZodString;
-  style: z.ZodOptional<z.ZodEnum<['primary', 'default', 'danger']>>;
-  command: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
-  opens: z.ZodOptional<z.ZodLazy<z.ZodTypeAny>>;
-}>> = z.lazy(() =>
+export const uiActionSchema: z.ZodType = z.lazy(() =>
   z.object({
     id: z.string(),
     label: z.string(),
     style: actionStyleSchema.optional(),
-    command: z.record(z.unknown()).optional(),
+    command: z.record(z.string(), z.unknown()).optional(),
     opens: serverUISchema.optional(),
   })
 );
 
-export const serverUISchema: z.ZodLazy<z.ZodObject<{
-  component: typeof componentTypeSchema;
-  version: z.ZodString;
-  props: z.ZodUnknown;
-  actions: z.ZodOptional<z.ZodArray<typeof uiActionSchema>>;
-}>> = z.lazy(() =>
+export const serverUISchema: z.ZodType = z.lazy(() =>
   z.object({
     component: componentTypeSchema,
     version: z.string().regex(/^\d+\.\d+\.\d+$/),
@@ -172,11 +162,11 @@ export const alertPropsSchema = z.object({
 });
 
 export const timelineItemPropsSchema = z.object({
-  timestamp: z.string().datetime(),
+  timestamp: utcDateTimeSchema,
   title: z.string(),
   description: z.string().optional(),
   status: z.enum(['completed', 'in_progress', 'pending', 'failed']),
-  metadata: z.record(z.union([z.string(), z.number()])).optional(),
+  metadata: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
 });
 
 export const goalSummaryPropsSchema = z.object({
@@ -204,7 +194,7 @@ export const formPropsSchema = z.object({
       options: z
         .array(z.object({ value: z.string(), label: z.string() }))
         .optional(),
-      constraints: z.record(z.unknown()).optional(),
+      constraints: z.record(z.string(), z.unknown()).optional(),
     })
   ),
 });

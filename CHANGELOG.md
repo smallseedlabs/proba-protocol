@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-11-08
+
+### Changed
+
+- Security: depend on patched **Zod 4.6.7** (`zod@^4.6.7`, GHSA line >=4.6.6). There is no safe Zod 3 patch for the remaining production high. Do **not** use npm `overrides` to force Zod 4 onto an older protocol tag
+- Replace `zod-to-json-schema` (Zod 3 generator) with Zod 4 `z.toJSONSchema(..., { target: "draft-07" })` in `scripts/generate-schemas.js`. Bundle envelope (`$schema`, `$id`, `definitions.<Name>`) is unchanged; nested per-schema `$ref` wrappers from the old generator are gone. Wire field names and `AuditEvent` required keys stay the same
+- Schema API updates internal to this package only: `z.record(z.string(), …)`, `z.uuid()` / `z.url()` / `z.iso.datetime()` plus `utcDateTimeSchema` (still rejects `+01:00` offsets). `validateAuditEvent` / `buildAuditEvent` / `validateStoredAuditEvent` / `validateMetricObservation` keep the same function names and `{ success }` result
+
+### Removed
+
+- Dependency `zod-to-json-schema`
+
 ## [0.5.0] - 2026-11-08
 
 ### Added

@@ -2,6 +2,7 @@
  * Schema exports for Proba protocol validation.
  */
 
+export * from './iso.js';
 export * from './command.js';
 export * from './event.js';
 export * from './ui.js';

@@ -3,6 +3,7 @@
  */
 
 import { z } from 'zod';
+import { utcDateTimeSchema } from './iso.js';
 import { AUDIT_CONTENT_MAX_CHARS } from '../types/audit.js';
 
 export const auditActorTypeSchema = z.enum(['user', 'brain', 'system', 'service']);
@@ -82,14 +83,14 @@ export const AUDIT_ACTION_PATTERN = /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/;
 // time for display.
 export const auditEventSchema = z.object({
   version: z.literal(1),
-  eventId: z.string().uuid(),
-  traceId: z.string().uuid(),
+  eventId: z.uuid(),
+  traceId: z.uuid(),
   spanId: spanIdSchema,
   parentSpanId: spanIdSchema.optional(),
   workspaceId: z.string().min(1),
-  userId: z.string().uuid().optional(),
-  goalId: z.string().uuid().optional(),
-  threadId: z.string().uuid().optional(),
+  userId: z.uuid().optional(),
+  goalId: z.uuid().optional(),
+  threadId: z.uuid().optional(),
   campaignId: z.string().min(1).optional(),
   actor: auditActorSchema,
   service: z.string().min(1),
@@ -103,8 +104,8 @@ export const auditEventSchema = z.object({
   cost: auditCostSchema.optional(),
   durationMs: z.number().nonnegative().optional(),
   // ISO 8601 / RFC 3339, UTC, trailing Z (e.g. Date.toISOString()); offsets are rejected.
-  occurredAt: z.string().datetime(),
-  details: z.record(z.unknown()),
+  occurredAt: utcDateTimeSchema,
+  details: z.record(z.string(), z.unknown()),
   tags: z.array(z.string().min(1)).optional(),
   content: auditContentSchema.optional(),
 });
@@ -115,7 +116,7 @@ export const storedAuditEventSchema = auditEventSchema.extend({
   prevHash: sha256HexSchema.nullable(),
   hash: sha256HexSchema,
   // Same timestamp rule as occurredAt: UTC with trailing Z.
-  ingestedAt: z.string().datetime(),
+  ingestedAt: utcDateTimeSchema,
   schemaVersion: z.number().int().positive(),
   contentDigest: sha256HexSchema.optional(),
 });

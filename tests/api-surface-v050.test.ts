@@ -81,7 +81,6 @@ describe('public API surface 0.5.0 (additive)', () => {
   });
 
   it('includes research definitions in the generated JSON Schema bundle without a default URL', () => {
-    expect(bundle.version).toBe('0.5.0');
     for (const name of [
       'UserSuppliedInput',
       'ResearchArtifact',
@@ -91,10 +90,13 @@ describe('public API surface 0.5.0 (additive)', () => {
     ]) {
       expect(bundle.definitions[name]).toBeDefined();
     }
-    const input = bundle.definitions.UserSuppliedInput.definitions?.UserSuppliedInput;
-    expect(input?.additionalProperties).toBe(false);
-    expect(input?.properties?.landingPageUrl).toMatchObject({ minLength: 1, maxLength: 2048 });
+    const input = bundle.definitions.UserSuppliedInput as {
+      additionalProperties?: boolean;
+      properties?: Record<string, unknown>;
+    };
+    expect(input.additionalProperties).toBe(false);
+    expect(input.properties?.landingPageUrl).toMatchObject({ minLength: 1, maxLength: 2048 });
     expect(JSON.stringify(bundle.definitions.UserSuppliedInput)).not.toMatch(/smallseedlabs\.com/);
-    expect(JSON.stringify(bundle.definitions.UserSuppliedInput)).not.toContain('"default"');
+    expect(JSON.stringify(bundle.definitions.UserSuppliedInput)).not.toMatch(/"default"\s*:/);
   });
 });

@@ -3,6 +3,7 @@
  */
 
 import { z } from 'zod';
+import { utcDateTimeSchema } from './iso.js';
 
 export const metricPlatformSchema = z.enum(['meta', 'google', 'reddit', 'x', 'microsoft', 'other']);
 
@@ -40,11 +41,11 @@ export const metricObservationSchema = z
     adsetId: z.string().min(1).optional(),
     adId: z.string().min(1).optional(),
     granularity: metricGranularitySchema,
-    periodStart: z.string().datetime(),
-    periodEnd: z.string().datetime(),
+    periodStart: utcDateTimeSchema,
+    periodEnd: utcDateTimeSchema,
     metrics: metricValuesSchema,
     currency: z.string().length(3),
-    fetchedAt: z.string().datetime(),
+    fetchedAt: utcDateTimeSchema,
     timezone: z
       .string()
       .min(1)

@@ -12,12 +12,13 @@
  */
 
 import { z } from 'zod';
+import { utcDateTimeSchema } from './iso.js';
 
 export const LANDING_PAGE_URL_MAX = 2048;
 export const RESEARCH_ACCEPT_VERB = 'research.accept';
 export const RESEARCH_SOURCE_KIND = 'http_url';
 
-const uuidSchema = z.string().uuid();
+const uuidSchema = z.uuid();
 const sha256HexSchema = z.string().regex(/^[0-9a-f]{64}$/);
 
 export type LandingPageUrlParseResult =
@@ -72,7 +73,7 @@ export const landingPageUrlSchema = z
   .superRefine((value, ctx) => {
     const parsed = parseLandingPageUrl(value);
     if (!parsed.ok) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: parsed.message });
+      ctx.addIssue({ code: 'custom', message: parsed.message });
     }
   });
 
@@ -102,7 +103,7 @@ export const researchSourceSchema = z
     sourceId: z.string().min(1).max(128),
     kind: z.literal(RESEARCH_SOURCE_KIND),
     url: z.string().min(1).max(LANDING_PAGE_URL_MAX),
-    fetchedAt: z.string().datetime(),
+    fetchedAt: utcDateTimeSchema,
     contentType: z.string().max(256).optional(),
     sha256: sha256HexSchema,
     excerpt: z.string().max(4096).optional(),
@@ -191,10 +192,10 @@ export const researchArtifactSchema = z
     unknowns: z.array(researchUnknownSchema).max(32),
     errorCode: z.string().max(64).optional(),
     errorMessage: z.string().max(500).optional(),
-    acceptedAt: z.string().datetime().optional(),
+    acceptedAt: utcDateTimeSchema.optional(),
     acceptedByAskId: uuidSchema.optional(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
+    createdAt: utcDateTimeSchema,
+    updatedAt: utcDateTimeSchema,
   })
   .strict();
 
@@ -243,7 +244,7 @@ export const researchReviewAskSchema = z
   .superRefine((data, ctx) => {
     if (!researchFindingsAreSourced(data.sources, data.findings)) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         message:
           'research findings must cite sourceIds that exist on this artifact; unsourced findings are not research',
       });

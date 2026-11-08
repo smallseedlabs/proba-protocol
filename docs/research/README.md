@@ -12,8 +12,8 @@ This package is I/O-free. It does not gather pages, persist artifacts, call Ads,
 
 | Consumer | Package | Why |
 | --- | --- | --- |
-| **proba-web** (operator UI, not portal) | `@smallseedlabs/proba-protocol@0.5.0` | Validate `create_goal.userSuppliedInput` and render `askType: "research_review"`. 0.4.0 `askPayloadSchema` rejects the new `askType`. Zod 3 default **strips** unknown keys: a 0.4.0 Hub would drop `userSuppliedInput` silently. |
-| **proba-hub** | `@smallseedlabs/proba-protocol@0.5.0` | Parse/validate the command and ask; copy `userSuppliedInput` onto `POST /v1/runs`; map gateway `research.accept` needs to `buildResearchReviewAskEvent`; send `resume` with the same `askId` / choice. |
+| **proba-web** (operator UI, not portal) | `@smallseedlabs/proba-protocol@0.6.0` (research fields since 0.5.0) | Validate `create_goal.userSuppliedInput` and render `askType: "research_review"`. 0.4.0 `askPayloadSchema` rejects the new `askType`. A 0.4.0 Hub on Zod 3 **strips** unknown keys and would drop `userSuppliedInput` silently. |
+| **proba-hub** | `@smallseedlabs/proba-protocol@0.6.0` | Parse/validate the command and ask; copy `userSuppliedInput` onto `POST /v1/runs`; map gateway `research.accept` needs to `buildResearchReviewAskEvent`; send `resume` with the same `askId` / choice. |
 | **proba-llm-gateway** | unchanged for this PR | Already has `HubRunRequest.userSuppliedInput` and artifact types at the SHA above. Do not duplicate that HTTP schema here. |
 | **ad-domain** | unchanged | Still takes `args.landingPageUrl` as a request argument. Ads security stays a separate repo. |
 | JSON Schema clients | regenerate from `schemas/index.json` **0.5.0** | New definitions: `UserSuppliedInput`, `ResearchArtifact`, `ResearchReviewAsk`, `ResearchAcceptanceBinding`, `LandingPageUrl`. Envelope `payload` stays `unknown`; payload validators are separate. |
@@ -23,12 +23,12 @@ Install (after this version is published by maintainers — this PR does not pub
 ```json
 {
   "dependencies": {
-    "@smallseedlabs/proba-protocol": "github:smallseedlabs/proba-protocol#v0.5.0"
+    "@smallseedlabs/proba-protocol": "github:smallseedlabs/proba-protocol#v0.6.0"
   }
 }
 ```
 
-Until a `v0.5.0` tag exists, pin the merge commit SHA of this protocol PR.
+Until a `v0.6.0` tag exists, pin the merge commit SHA of the Zod 4 security PR (after 0.5.0 research schemas). Do not publish/tag from the agent PR. Ads must bump protocol and `zod@^4.6.6` together; npm `overrides` onto an old protocol tag is rejected.
 
 Existing `create_goal` / `answer_ask` / `clarify` / `plan_approval` / `action_approval` payloads remain valid. Clients that only handle those three ask types must ignore `research_review` via event `fallbackText` and must not treat it as a budget card.
 
