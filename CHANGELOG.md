@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Hub builder `buildResearchReviewAskEvent` (not a brain mapper). `mapToolCallToEvent` for `research.accept` / `research.gather` emits a system message instead of an approval card
   - JSON examples under `docs/research/`; JSON Schema bundle definitions regenerated
 - Field names match gateway research types at `proba-llm-gateway@86630d02cbbeb6b6459676b547c41064d6df3321`. Context packets are not research. workspaceId/userId are never taken from model or `userSuppliedInput` fields. Research acceptance does not bypass spend policy
+- CI runs on every pull request (not only PRs targeting `main`) plus `push` to `cursor/**`; gitleaks MIT CLI job; JSON Schema consumer fixture under `tests/fixtures/web-consumer-schema-contract.json`
 
 ## [0.4.0] - 2026-10-28
 

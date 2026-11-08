@@ -16,7 +16,7 @@ This package is I/O-free. It does not gather pages, persist artifacts, call Ads,
 | **proba-hub** | `@smallseedlabs/proba-protocol@0.6.0` | Parse/validate the command and ask; copy `userSuppliedInput` onto `POST /v1/runs`; map gateway `research.accept` needs to `buildResearchReviewAskEvent`; send `resume` with the same `askId` / choice. |
 | **proba-llm-gateway** | unchanged for this PR | Already has `HubRunRequest.userSuppliedInput` and artifact types at the SHA above. Do not duplicate that HTTP schema here. |
 | **ad-domain** | unchanged | Still takes `args.landingPageUrl` as a request argument. Ads security stays a separate repo. |
-| JSON Schema clients | regenerate from `schemas/index.json` **0.5.0** | New definitions: `UserSuppliedInput`, `ResearchArtifact`, `ResearchReviewAsk`, `ResearchAcceptanceBinding`, `LandingPageUrl`. Envelope `payload` stays `unknown`; payload validators are separate. |
+| JSON Schema clients | regenerate from `schemas/index.json` **0.6.0** | Same definition names as 0.5.0. Generator is Zod 4 `z.toJSONSchema` (flat objects, no nested `$ref` wrappers). Envelope `payload` stays `unknown`; payload validators are separate. |
 
 Install (after this version is published by maintainers — this PR does not publish or tag):
 
@@ -28,7 +28,20 @@ Install (after this version is published by maintainers — this PR does not pub
 }
 ```
 
-Until a `v0.6.0` tag exists, pin the merge commit SHA of the Zod 4 security PR (after 0.5.0 research schemas). Do not publish/tag from the agent PR. Ads must bump protocol and `zod@^4.6.6` together; npm `overrides` onto an old protocol tag is rejected.
+Until a `v0.6.0` tag exists, pin this PR's head SHA (not leftover `feat/context-bridge-v0.4.0`). Do not publish/tag from the agent PR. Ads must bump protocol and `zod@^4.6.6` together; npm `overrides` onto an old protocol tag is rejected.
+
+## Merge order and bases
+
+Default branch is **`main`**. Protocol **v0.4.0 already landed on main** as squash [#21](https://github.com/smallseedlabs/proba-protocol/pull/21) (`v0.4.0` tag). The leftover `feat/context-bridge-v0.4.0` branch is **not** current (it is the pre-squash line; protocol tree matches main except later CI action pins from [#20](https://github.com/smallseedlabs/proba-protocol/pull/20)).
+
+Do **not** merge these PRs into that leftover branch as the integration path.
+
+| Order | PR | Base | What |
+| --- | --- | --- | --- |
+| 1 | [#22](https://github.com/smallseedlabs/proba-protocol/pull/22) research 0.5.0 | **`main`** | `userSuppliedInput` + `research_review`. Still Zod 3. Merge this first. |
+| 2 | [#23](https://github.com/smallseedlabs/proba-protocol/pull/23) Zod 4 / 0.6.0 | **#22 head** (`cursor/research-review-contract-ac36`) until #22 merges, then retarget **`main`** | Patched `zod@^4.6.7`. **Web should pin 0.6.0 (this PR's head SHA)** after both land. |
+
+CI: `.github/workflows/ci.yml` runs on every `pull_request` (any base) and on `push` to `main` and `cursor/**`, including gitleaks. It used to filter `main` only, which skipped stacked PRs.
 
 Existing `create_goal` / `answer_ask` / `clarify` / `plan_approval` / `action_approval` payloads remain valid. Clients that only handle those three ask types must ignore `research_review` via event `fallbackText` and must not treat it as a budget card.
 
