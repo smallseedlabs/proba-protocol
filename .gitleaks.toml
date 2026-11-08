@@ -1,0 +1,14 @@
+title = "proba-protocol gitleaks"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Docs and tests may mention secret *kinds*; they must not contain live credentials"
+paths = [
+  '''.*\.test\.ts$''',
+  '''(^|/)README\.md$''',
+  '''(^|/)SECURITY\.md$''',
+  '''(^|/)CHANGELOG\.md$''',
+  '''(^|/)docs/.*''',
+]
