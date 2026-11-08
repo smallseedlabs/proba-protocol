@@ -1,11 +1,15 @@
 name: Publish Package
 
+# Creating a GitHub Release for a new tag fires both `push` (the tag) and
+# `release` (published). This workflow used to listen to both, so two jobs
+# ran `npm publish` on the same version. The tag-push job succeeded; the
+# release job 409'd ("Cannot publish over existing version") on every
+# tagged GitHub Release from v0.3.1 through v0.6.0.
+# Publish only on the version tag. Do not republish from `release` events.
 on:
   push:
     tags:
       - 'v*.*.*'
-  release:
-    types: [published]
 
 permissions:
   contents: read
@@ -16,19 +20,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      
+
       - uses: actions/setup-node@v7
         with:
           node-version: '20'
           registry-url: 'https://npm.pkg.github.com'
           scope: '@smallseedlabs'
-      
+
       - run: npm ci
-      
+
       - run: npm run validate
-      
+
       - run: npm run build
-      
+
       - name: Publish to GitHub Packages
         run: npm publish
         env:
