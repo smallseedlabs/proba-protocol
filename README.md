@@ -576,7 +576,7 @@ This project follows [Semantic Versioning](https://semver.org/):
 - **Minor**: New features, backward-compatible
 - **Patch**: Bug fixes, backward-compatible
 
-Current version: **0.5.0**
+Current version: **0.6.0** (Zod 4.6.7). Research-review schemas landed in **0.5.0**; this version is the security migration of the runtime. Consumers that import `validateAuditEvent` / `buildAuditEvent` do not change call sites. Do not `overrides`-force Zod 4 onto protocol 0.4.x / 0.5.0. After maintainers tag, Ads/Hub/Web should pin `github:smallseedlabs/proba-protocol#v0.6.0` together with `zod@^4.6.6`. This repo does not publish or tag from this PR.
 
 ## License
 

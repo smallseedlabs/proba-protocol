@@ -1,4 +1,4 @@
-# Research review schemas (protocol 0.5.0)
+# Research review schemas (protocol 0.6.0; research fields since 0.5.0)
 
 Additive contract for operator-entered landing URLs, versioned sourced research, and an explicit research-review ask. Compatible with gateway `docs/RESEARCH_REVIEW_CONTRACT.md` and types at `smallseedlabs/proba-llm-gateway@86630d02cbbeb6b6459676b547c41064d6df3321` (gateway PR4; not merged at time of writing).
 
@@ -12,34 +12,34 @@ This package is I/O-free. It does not gather pages, persist artifacts, call Ads,
 
 | Consumer | Package | Why |
 | --- | --- | --- |
-| **proba-web** (operator UI, not portal) | `@smallseedlabs/proba-protocol@0.5.0` | Validate `create_goal.userSuppliedInput` and render `askType: "research_review"`. 0.4.0 `askPayloadSchema` rejects the new `askType`. Zod 3 default **strips** unknown keys: a 0.4.0 Hub would drop `userSuppliedInput` silently. |
-| **proba-hub** | `@smallseedlabs/proba-protocol@0.5.0` | Parse/validate the command and ask; copy `userSuppliedInput` onto `POST /v1/runs`; map gateway `research.accept` needs to `buildResearchReviewAskEvent`; send `resume` with the same `askId` / choice. |
+| **proba-web** (operator UI, not portal) | `@smallseedlabs/proba-protocol@0.6.0` (research fields since 0.5.0) | Validate `create_goal.userSuppliedInput` and render `askType: "research_review"`. 0.4.0 `askPayloadSchema` rejects the new `askType`. A 0.4.0 Hub on Zod 3 **strips** unknown keys and would drop `userSuppliedInput` silently. |
+| **proba-hub** | `@smallseedlabs/proba-protocol@0.6.0` | Parse/validate the command and ask; copy `userSuppliedInput` onto `POST /v1/runs`; map gateway `research.accept` needs to `buildResearchReviewAskEvent`; send `resume` with the same `askId` / choice. |
 | **proba-llm-gateway** | unchanged for this PR | Already has `HubRunRequest.userSuppliedInput` and artifact types at the SHA above. Do not duplicate that HTTP schema here. |
 | **ad-domain** | unchanged | Still takes `args.landingPageUrl` as a request argument. Ads security stays a separate repo. |
-| JSON Schema clients | regenerate from `schemas/index.json` **0.5.0** | New definitions: `UserSuppliedInput`, `ResearchArtifact`, `ResearchReviewAsk`, `ResearchAcceptanceBinding`, `LandingPageUrl`. Envelope `payload` stays `unknown`; payload validators are separate. |
+| JSON Schema clients | regenerate from `schemas/index.json` **0.6.0** | Same definition names as 0.5.0. Generator is Zod 4 `z.toJSONSchema` (flat objects, no nested `$ref` wrappers). Envelope `payload` stays `unknown`; payload validators are separate. |
 
 Install (after this version is published by maintainers — this PR does not publish or tag):
 
 ```json
 {
   "dependencies": {
-    "@smallseedlabs/proba-protocol": "github:smallseedlabs/proba-protocol#v0.5.0"
+    "@smallseedlabs/proba-protocol": "github:smallseedlabs/proba-protocol#v0.6.0"
   }
 }
 ```
 
-Until a `v0.5.0` tag exists, pin this PR's head SHA (not the leftover `feat/context-bridge-v0.4.0` branch). Maintainers tag after merge; this PR does not publish.
+Until a `v0.6.0` tag exists, pin this PR's head SHA (not leftover `feat/context-bridge-v0.4.0`). Do not publish/tag from the agent PR. Ads must bump protocol and `zod@^4.6.6` together; npm `overrides` onto an old protocol tag is rejected.
 
 ## Merge order and bases
 
-Default branch is **`main`**. Protocol **v0.4.0 already landed on main** as squash [#21](https://github.com/smallseedlabs/proba-protocol/pull/21) (`v0.4.0` tag). The leftover `feat/context-bridge-v0.4.0` branch is **not** current (it is the pre-squash line; protocol tree matches main except later CI action pins from [#20](https://github.com/smallseedlabs/proba-protocol/pull/20)).
+Default branch is **`main`**. Protocol **v0.4.0** landed as squash [#21](https://github.com/smallseedlabs/proba-protocol/pull/21). Research **0.5.0** landed as squash [#22](https://github.com/smallseedlabs/proba-protocol/pull/22) (`f1109b1`). The leftover `feat/context-bridge-v0.4.0` branch is **not** current.
 
-Do **not** merge these PRs into that leftover branch as the integration path.
+Do **not** merge this PR into that leftover branch.
 
 | Order | PR | Base | What |
 | --- | --- | --- | --- |
-| 1 | [#22](https://github.com/smallseedlabs/proba-protocol/pull/22) research 0.5.0 | **`main`** | `userSuppliedInput` + `research_review`. Still Zod 3. |
-| 2 | [#23](https://github.com/smallseedlabs/proba-protocol/pull/23) Zod 4 / 0.6.0 | **#22 head** (`cursor/research-review-contract-ac36`) until #22 merges, then retarget **`main`** | Patched `zod@^4.6.7`. Web should pin **0.6.0** after this lands. |
+| 1 | [#22](https://github.com/smallseedlabs/proba-protocol/pull/22) research 0.5.0 | **`main`** | **Merged.** `userSuppliedInput` + `research_review` (Zod 3). |
+| 2 | [#23](https://github.com/smallseedlabs/proba-protocol/pull/23) Zod 4 / 0.6.0 | **`main`** (after merging `origin/main` into this branch to absorb the #22 squash) | Patched `zod@^4.6.7`. **Web/Hub/Ads pin this PR's head SHA** until maintainers tag `v0.6.0`. |
 
 CI: `.github/workflows/ci.yml` runs on every `pull_request` (any base) and on `push` to `main` and `cursor/**`, including gitleaks. It used to filter `main` only, which skipped stacked PRs.
 

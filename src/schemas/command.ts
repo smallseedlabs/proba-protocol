@@ -3,6 +3,7 @@
  */
 
 import { z } from 'zod';
+import { utcDateTimeSchema } from './iso.js';
 import { researchAcceptanceBindingSchema, userSuppliedInputSchema } from './research.js';
 
 export const commandTypeSchema = z.enum([
@@ -21,7 +22,7 @@ export const sendMessagePayloadSchema = z.object({
     .array(
       z.object({
         type: z.enum(['image', 'file']),
-        url: z.string().url(),
+        url: z.url(),
         name: z.string().optional(),
         mimeType: z.string().optional(),
       })
@@ -31,9 +32,9 @@ export const sendMessagePayloadSchema = z.object({
 
 export const answerAskPayloadSchema = z
   .object({
-    askId: z.string().uuid(),
+    askId: z.uuid(),
     choice: z.enum(['approve', 'reject', 'edit']),
-    values: z.record(z.unknown()).optional(),
+    values: z.record(z.string(), z.unknown()).optional(),
     edit: z.string().optional(),
     researchAcceptance: researchAcceptanceBindingSchema.optional(),
     userSuppliedInput: userSuppliedInputSchema.optional(),
@@ -41,7 +42,7 @@ export const answerAskPayloadSchema = z
   .superRefine((data, ctx) => {
     if (data.userSuppliedInput !== undefined && data.choice !== 'edit') {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         message:
           'userSuppliedInput on answer_ask is only allowed with choice=edit; approve/reject must not change the landing URL',
         path: ['userSuppliedInput'],
@@ -64,7 +65,7 @@ export const createGoalPayloadSchema = z.object({
 });
 
 export const approvePlanPayloadSchema = z.object({
-  planId: z.string().uuid(),
+  planId: z.uuid(),
   approved: z.boolean(),
   modifications: z.string().optional(),
 });
@@ -84,11 +85,11 @@ export const markReadPayloadSchema = z.object({
 
 export const commandEnvelopeSchema = z.object({
   kind: z.literal('command'),
-  clientMsgId: z.string().uuid(),
+  clientMsgId: z.uuid(),
   type: commandTypeSchema,
-  threadId: z.string().uuid().optional(),
+  threadId: z.uuid().optional(),
   payload: z.unknown(),
-  sentAt: z.string().datetime(),
+  sentAt: utcDateTimeSchema,
 });
 
 export function validateCommandPayload(type: string, payload: unknown): boolean {

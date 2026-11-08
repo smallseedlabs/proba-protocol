@@ -3,6 +3,7 @@
  */
 
 import { z } from 'zod';
+import { utcDateTimeSchema } from './iso.js';
 import { serverUISchema } from './ui.js';
 import { researchReviewAskSchema } from './research.js';
 
@@ -51,7 +52,7 @@ export const questionSchema = z.object({
 
 export const askPayloadSchema = z
   .object({
-    askId: z.string().uuid(),
+    askId: z.uuid(),
     askType: z.enum(['clarify', 'action_approval', 'plan_approval', 'research_review']),
     title: z.string().min(1),
     description: z.string().optional(),
@@ -65,7 +66,7 @@ export const askPayloadSchema = z
       })
       .optional(),
     risk: z.enum(['low', 'medium', 'high']),
-    expiresAt: z.string().datetime().optional(),
+    expiresAt: utcDateTimeSchema.optional(),
     onExpire: z.enum(['deny', 'default', 'escalate']).optional(),
     questions: z.array(questionSchema).min(1).max(3),
     research: researchReviewAskSchema.optional(),
@@ -74,14 +75,14 @@ export const askPayloadSchema = z
     if (data.askType === 'research_review') {
       if (!data.research) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: 'custom',
           message: 'askType research_review requires payload.research bound to the current artifact revision',
           path: ['research'],
         });
       }
       if (data.costEffect !== undefined) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: 'custom',
           message:
             'research_review is not spend approval; omit costEffect so this is not rendered as a budget card',
           path: ['costEffect'],
@@ -89,7 +90,7 @@ export const askPayloadSchema = z
       }
       if (data.onExpire !== undefined && data.onExpire !== 'deny') {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: 'custom',
           message: 'research_review onExpire must be deny; absence of an answer is not acceptance',
           path: ['onExpire'],
         });
@@ -97,7 +98,7 @@ export const askPayloadSchema = z
       for (let i = 0; i < data.questions.length; i += 1) {
         if (data.questions[i].default !== undefined) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             message:
               'research_review questions must not set default; never auto-prefill the landing URL',
             path: ['questions', i, 'default'],
@@ -106,7 +107,7 @@ export const askPayloadSchema = z
       }
     } else if (data.research !== undefined) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         message: 'payload.research is only valid on askType research_review',
         path: ['research'],
       });
@@ -114,12 +115,12 @@ export const askPayloadSchema = z
   });
 
 export const askResolvedPayloadSchema = z.object({
-  askId: z.string().uuid(),
+  askId: z.uuid(),
   resolution: z.enum(['answered', 'expired', 'superseded']),
   answer: z
     .object({
       choice: z.enum(['approve', 'reject', 'edit']),
-      values: z.record(z.unknown()).optional(),
+      values: z.record(z.string(), z.unknown()).optional(),
     })
     .optional(),
 });
@@ -145,7 +146,7 @@ export const alertPayloadSchema = z.object({
 });
 
 export const goalUpdatedPayloadSchema = z.object({
-  goalId: z.string().uuid(),
+  goalId: z.uuid(),
   status: z.enum(['active', 'paused', 'completed', 'cancelled']),
   progress: z
     .object({
@@ -172,7 +173,7 @@ export const goalUpdatedPayloadSchema = z.object({
 });
 
 export const ackPayloadSchema = z.object({
-  clientMsgId: z.string().uuid(),
+  clientMsgId: z.uuid(),
   processed: z.boolean(),
 });
 
@@ -188,7 +189,7 @@ export const errorPayloadSchema = z.object({
     'internal',
   ]),
   message: z.string().min(1),
-  details: z.record(z.unknown()).optional(),
+  details: z.record(z.string(), z.unknown()).optional(),
   retryable: z.boolean(),
 });
 
@@ -196,11 +197,11 @@ export const eventEnvelopeSchema = z.object({
   kind: z.literal('event'),
   seq: z.number().int().nonnegative(),
   type: eventTypeSchema,
-  threadId: z.string().uuid().optional(),
+  threadId: z.uuid().optional(),
   payload: z.unknown(),
   ui: serverUISchema.optional(),
   fallbackText: z.string().optional(),
-  at: z.string().datetime(),
+  at: utcDateTimeSchema,
 });
 
 export function validateEventPayload(type: string, payload: unknown): boolean {

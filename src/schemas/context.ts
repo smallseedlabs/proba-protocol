@@ -7,8 +7,9 @@
  */
 
 import { z } from 'zod';
+import { utcDateTimeSchema } from './iso.js';
 
-const uuidSchema = z.string().uuid();
+const uuidSchema = z.uuid();
 const sha256HexSchema = z.string().regex(/^[0-9a-f]{64}$/);
 
 /** Brain step types the bridge builds context for. */
@@ -123,7 +124,7 @@ export const contextItemSchema = z
     trust: itemTrustSchema,
     text: z.string().optional(),
     data: z.unknown().optional(),
-    observedAt: z.string().datetime(),
+    observedAt: utcDateTimeSchema,
     score: z.number().optional(),
   })
   .refine((item) => item.text !== undefined || item.data !== undefined, {
@@ -156,14 +157,14 @@ export const contextManifestSourceSchema = z.object({
   returned: z.number().int().nonnegative(),
   included: z.number().int().nonnegative(),
   dropped: z.number().int().nonnegative(),
-  droppedReasons: z.record(z.number().int().nonnegative()).default({}),
+  droppedReasons: z.record(z.string(), z.number().int().nonnegative()).default({}),
   cacheHit: z.boolean(),
   latencyMs: z.number().nonnegative(),
   tokens: z.number().int().nonnegative(),
 });
 
 export const contextManifestSchema = z.object({
-  sources: z.record(contextManifestSourceSchema),
+  sources: z.record(z.string(), contextManifestSourceSchema),
   totals: z.object({
     returned: z.number().int().nonnegative(),
     included: z.number().int().nonnegative(),
@@ -264,7 +265,7 @@ export const contextAuditDetailsSchema = z
     needKind: z.string().min(1).optional(),
     gapCode: z.string().min(1).optional(),
     configVersion: z.string().min(1).optional(),
-    counts: z.record(z.number()).optional(),
+    counts: z.record(z.string(), z.number()).optional(),
   })
   .strict();
 

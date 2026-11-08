@@ -1,14 +1,22 @@
 /**
  * Script to generate JSON Schema bundle from Zod schemas.
+ * Zod 4: native z.toJSONSchema() (draft-07). Does not use zod-to-json-schema.
  */
 
-import { zodToJsonSchema } from 'zod-to-json-schema';
 import { writeFileSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { z } from 'zod';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+function toDraft7(schema) {
+  return z.toJSONSchema(schema, {
+    target: 'draft-07',
+    unrepresentable: 'any',
+  });
+}
 
 async function generateSchemas() {
   const { commandEnvelopeSchema, commandTypeSchema } = await import(
@@ -46,35 +54,29 @@ async function generateSchemas() {
     $schema: 'http://json-schema.org/draft-07/schema#',
     $id: 'https://github.com/smallseedlabs/proba-protocol/schemas',
     title: 'Proba Protocol Schemas',
-    version: '0.5.0',
+    version: '0.6.0',
     definitions: {
-      CommandType: zodToJsonSchema(commandTypeSchema, 'CommandType'),
-      CommandEnvelope: zodToJsonSchema(commandEnvelopeSchema, 'CommandEnvelope'),
-      EventType: zodToJsonSchema(eventTypeSchema, 'EventType'),
-      EventEnvelope: zodToJsonSchema(eventEnvelopeSchema, 'EventEnvelope'),
-      ComponentType: zodToJsonSchema(componentTypeSchema, 'ComponentType'),
-      ServerUI: zodToJsonSchema(serverUISchema, 'ServerUI'),
-      AuditEvent: zodToJsonSchema(auditEventSchema, 'AuditEvent'),
-      StoredAuditEvent: zodToJsonSchema(storedAuditEventSchema, 'StoredAuditEvent'),
-      MetricObservation: zodToJsonSchema(metricObservationSchema, 'MetricObservation'),
-      StepType: zodToJsonSchema(stepTypeSchema, 'StepType'),
-      ContextRequest: zodToJsonSchema(contextRequestSchema, 'ContextRequest'),
-      ContextPacket: zodToJsonSchema(contextPacketSchema, 'ContextPacket'),
-      ContextNeed: zodToJsonSchema(contextNeedSchema, 'ContextNeed'),
-      ActAsAssertionClaims: zodToJsonSchema(actAsAssertionClaimsSchema, 'ActAsAssertionClaims'),
-      ContextAuditDetails: zodToJsonSchema(contextAuditDetailsSchema, 'ContextAuditDetails'),
-      BrainContextAttachedDetails: zodToJsonSchema(
-        brainContextAttachedDetailsSchema,
-        'BrainContextAttachedDetails'
-      ),
-      LandingPageUrl: zodToJsonSchema(landingPageUrlSchema, 'LandingPageUrl'),
-      UserSuppliedInput: zodToJsonSchema(userSuppliedInputSchema, 'UserSuppliedInput'),
-      ResearchArtifact: zodToJsonSchema(researchArtifactSchema, 'ResearchArtifact'),
-      ResearchReviewAsk: zodToJsonSchema(researchReviewAskSchema, 'ResearchReviewAsk'),
-      ResearchAcceptanceBinding: zodToJsonSchema(
-        researchAcceptanceBindingSchema,
-        'ResearchAcceptanceBinding'
-      ),
+      CommandType: toDraft7(commandTypeSchema),
+      CommandEnvelope: toDraft7(commandEnvelopeSchema),
+      EventType: toDraft7(eventTypeSchema),
+      EventEnvelope: toDraft7(eventEnvelopeSchema),
+      ComponentType: toDraft7(componentTypeSchema),
+      ServerUI: toDraft7(serverUISchema),
+      AuditEvent: toDraft7(auditEventSchema),
+      StoredAuditEvent: toDraft7(storedAuditEventSchema),
+      MetricObservation: toDraft7(metricObservationSchema),
+      StepType: toDraft7(stepTypeSchema),
+      ContextRequest: toDraft7(contextRequestSchema),
+      ContextPacket: toDraft7(contextPacketSchema),
+      ContextNeed: toDraft7(contextNeedSchema),
+      ActAsAssertionClaims: toDraft7(actAsAssertionClaimsSchema),
+      ContextAuditDetails: toDraft7(contextAuditDetailsSchema),
+      BrainContextAttachedDetails: toDraft7(brainContextAttachedDetailsSchema),
+      LandingPageUrl: toDraft7(landingPageUrlSchema),
+      UserSuppliedInput: toDraft7(userSuppliedInputSchema),
+      ResearchArtifact: toDraft7(researchArtifactSchema),
+      ResearchReviewAsk: toDraft7(researchReviewAskSchema),
+      ResearchAcceptanceBinding: toDraft7(researchAcceptanceBindingSchema),
     },
   };
 

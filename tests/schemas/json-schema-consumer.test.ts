@@ -41,7 +41,17 @@ interface Contract {
   >;
 }
 
-function unwrap(def: JsonSchemaNode): JsonSchemaNode {
+function unwrap(def: JsonSchemaNode, name: string): JsonSchemaNode {
+  // Zod 4 z.toJSONSchema: flat object with top-level properties (nested $defs
+  // may exist for UI). Prefer that so we do not pick an inner ServerUI schema.
+  if (def.properties) {
+    return def;
+  }
+  // zod-to-json-schema 0.5.0: { $ref, definitions: { [name]: { properties } } }
+  const named = def.definitions?.[name];
+  if (named?.properties) {
+    return named;
+  }
   const nested = def.definitions ? Object.values(def.definitions) : [];
   if (nested.length === 1 && nested[0]?.properties) {
     return nested[0];
@@ -65,7 +75,7 @@ describe('JSON Schema consumer contract (Web/Hub)', () => {
 
   it('preserves required wire fields for each contracted definition', () => {
     for (const [name, spec] of Object.entries(contract.definitions)) {
-      const node = unwrap(bundle.definitions[name]);
+      const node = unwrap(bundle.definitions[name], name);
       // z.unknown() fields (envelope payload) are properties on both generators but
       // zod-to-json-schema (0.5.0) omits them from `required`; assert properties separately.
       expect(node.required).toEqual(expect.arrayContaining(spec.required));
@@ -86,7 +96,7 @@ describe('JSON Schema consumer contract (Web/Hub)', () => {
     const json = JSON.stringify(bundle.definitions.UserSuppliedInput);
     expect(json).not.toMatch(/smallseedlabs\.com/);
     expect(json).not.toMatch(/"default"\s*:/);
-    const node = unwrap(bundle.definitions.UserSuppliedInput);
+    const node = unwrap(bundle.definitions.UserSuppliedInput, 'UserSuppliedInput');
     expect(node.properties?.landingPageUrl).toMatchObject({ type: 'string' });
   });
 
