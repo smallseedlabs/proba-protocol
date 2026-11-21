@@ -10,3 +10,4 @@ export * from './audit.js';
 export * from './metrics.js';
 export * from './context.js';
 export * from './research.js';
+export * from './checker.js';
