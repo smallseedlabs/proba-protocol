@@ -36,6 +36,7 @@ export const answerAskPayloadSchema = z
     choice: z.enum(['approve', 'reject', 'edit']),
     values: z.record(z.string(), z.unknown()).optional(),
     edit: z.string().optional(),
+    approvalToken: z.string().min(16).max(256).optional(),
     researchAcceptance: researchAcceptanceBindingSchema.optional(),
     userSuppliedInput: userSuppliedInputSchema.optional(),
   })
